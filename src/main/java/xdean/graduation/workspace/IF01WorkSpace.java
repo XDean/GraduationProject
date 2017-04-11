@@ -2,7 +2,7 @@ package xdean.graduation.workspace;
 
 import static xdean.graduation.workspace.Context.*;
 import static xdean.graduation.workspace.Util.*;
-import static xdean.jex.util.task.TaskUtil.uncheck;
+import static xdean.jex.util.task.TaskUtil.*;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -64,7 +64,11 @@ public class IF01WorkSpace {
   /*************
    * Ju Bo Hua *
    *************/
+  @SneakyThrows(IOException.class)
   Observable<Result<Trader<Object>>> simpleJBH(Path file, Repo repo) {
+    Path outputFile = getOutputFile(file);
+    uncatch(() -> Files.delete(outputFile));
+    Files.createFile(outputFile);
     return getReader().toObservable(file)
         .lift(new ContinuousGroupOperator<>(Order::getDate))
         .map(IF01WorkSpace::skipAndOp)
@@ -72,7 +76,7 @@ public class IF01WorkSpace {
         .concatMap(o ->
             indaySave(
                 o.getRight(),
-                uncheck(() -> Files.newOutputStream(getOutputFile(file), StandardOpenOption.APPEND)),
+                uncheck(() -> Files.newOutputStream(outputFile, StandardOpenOption.APPEND)),
                 getHook().createTraderWithParam(repo.copy()))
                 .toObservable())
         .doOnNext(p -> System.out.println(getHook().formatIndayResult(p)))
@@ -92,9 +96,12 @@ public class IF01WorkSpace {
         .doOnSuccess(p -> System.out.println(getHook().formatBestParam(p)));
   }
 
+  @SneakyThrows(IOException.class)
   Observable<Result<Trader<Object>>> paramIterateJBH(Path file, Repo repo) {
     FixedLengthList<Observable<Order>> list = new FixedLengthList<>(5);
-    // Observable<Order> accumulateOrder = Observable.empty();
+    Path outputFile = getOutputFile(file);
+    uncatch(() -> Files.delete(outputFile));
+    Files.createFile(outputFile);
     return getReader()
         .toObservable(file)
         .lift(new ContinuousGroupOperator<String, Order>(o -> o.getDate()))
@@ -122,7 +129,7 @@ public class IF01WorkSpace {
             getHook().formatParam(p.getLeft().getRight().getLeft())))
         .concatMap(p -> indaySave(
             p.getRight().getLeft().getRight(),
-            uncheck(() -> Files.newOutputStream(getOutputFile(file), StandardOpenOption.APPEND)),
+            uncheck(() -> Files.newOutputStream(outputFile, StandardOpenOption.APPEND)),
             getHook().createTrader(repo.copy()).setParam(p.getLeft().getRight().getLeft()))
             .toObservable())
         .doOnNext(p -> System.out.println(getHook().formatIndayResult(p)))

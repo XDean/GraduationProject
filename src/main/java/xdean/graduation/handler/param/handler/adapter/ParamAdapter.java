@@ -47,8 +47,8 @@ public interface ParamAdapter<P, T> extends ParamHandler<P> {
         bestParam = result.getLeft();
         oldPrecision = pair.getRight();
 
-        Log.log.debug("Best param is {}, result is {}, Next precision {}.",
-            bestParam, result.getRight(), oldPrecision);
+        // Log.log.debug("Best param is {}, result is {}, Next precision {}.",
+        // bestParam, result.getRight(), oldPrecision);
         pair = getParams(bestParam, pair.getRight());
       }
       s.onSuccess(result);
@@ -57,5 +57,8 @@ public interface ParamAdapter<P, T> extends ParamHandler<P> {
 
   @Slf4j
   static class Log {
+    static {
+      log.getClass();
+    }
   }
 }

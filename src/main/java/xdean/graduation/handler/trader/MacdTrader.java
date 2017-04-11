@@ -15,7 +15,7 @@ import xdean.jex.util.calc.MathUtil;
  * @author XDean
  *
  */
-public class MacdTrader implements Trader<int[]> {
+public class MacdTrader implements Trader<Integer[]> {
 
   @Getter
   Repo repo;
@@ -26,7 +26,7 @@ public class MacdTrader implements Trader<int[]> {
   }
 
   @Override
-  public Trader<int[]> setParam(int[] p) {
+  public Trader<Integer[]> setParam(Integer[] p) {
     macd = new MacdExtend(p[0], p[1], p[2]);
     return this;
   }
@@ -47,8 +47,8 @@ public class MacdTrader implements Trader<int[]> {
     Double oldInput;
 
     double position = 0d;
-    UnaryOperator<Double> openRate = d -> d * d * 500;
-    UnaryOperator<Double> closeRate = d -> d * d * 200;
+    UnaryOperator<Double> openRate = d -> 1d;
+    UnaryOperator<Double> closeRate = d -> d * d * 500;
 
     public MacdExtend(int f, int s, int a) {
       super(f, s, a);
