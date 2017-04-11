@@ -1,6 +1,7 @@
 package xdean.graduation.workspace;
 
 import static xdean.graduation.workspace.Context.RISK_FREE;
+import static xdean.jex.util.task.TaskUtil.uncatch;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -221,7 +222,10 @@ public class Util {
   }
 
   public Path getOutputFile(Path file) throws IOException {
-    return Paths.get("output", FileUtil.getNameWithoutSuffix(file) + ".output.csv");
+    Path output = Paths.get("output", FileUtil.getNameWithoutSuffix(file) + ".output.csv");
+    uncatch(() -> Files.delete(output));
+    Files.createFile(output);
+    return output;
   }
 
   public Path getDailyOutputFile(Path file) {

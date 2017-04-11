@@ -1,5 +1,7 @@
 package xdean.graduation.workspace.hook.mdw;
 
+import static xdean.jex.extra.rx.RxUtil.*;
+import rx.Observable;
 import xdean.graduation.handler.param.handler.ParamHandler;
 import xdean.graduation.handler.param.handler.adapter.IntArrayParamAdapter;
 import xdean.graduation.handler.param.handler.adapter.IntParamAdapter;
@@ -12,7 +14,7 @@ import xdean.graduation.workspace.hook.BaseHook;
 import xdean.graduation.workspace.optional.ParamSelectIndex;
 import xdean.jex.extra.Pair;
 
-public class MdwHook extends BaseHook<Integer[], MdwTrader> {
+public class MdwHook extends BaseHook<int[], MdwTrader> {
 
   @Override
   public MdwTrader createTrader(Repo repo) {
@@ -20,12 +22,18 @@ public class MdwHook extends BaseHook<Integer[], MdwTrader> {
   }
 
   @Override
-  public Integer[] getParam() {
-    return new Integer[] { 0, 0 };
+  public int[] getParam() {
+    return new int[] { 0, 0 };
   }
 
   @Override
-  public ParamHandler<Integer[]> getParamHandler() {
+  public Observable<int[]> getParams() {
+    return cross(range(0, 20, 1), range(0, 5, 1))
+        .map(p -> new int[] { p.getLeft(), p.getRight() });
+  }
+
+  @Override
+  public ParamHandler<int[]> getParamHandler() {
     return new IntArrayParamAdapter(
         new IntParamAdapter(0, 50, 5, 5),
         new IntParamAdapter(0, 50, 5, 5));
@@ -37,18 +45,18 @@ public class MdwHook extends BaseHook<Integer[], MdwTrader> {
   }
 
   @Override
-  public String formatParam(Integer[] param) {
+  public String formatParam(int[] param) {
     return String.format("open = %d, close = %d.", param[0], param[1]);
   }
 
   @Override
-  public String formatParamResult(Pair<Integer[], ?> pair) {
+  public String formatParamResult(Pair<int[], ?> pair) {
     return String.format("With param open = %d, close = %d, the %s = %.2f.",
         pair.getLeft()[0], pair.getLeft()[1], getParamSelectIndexName(), pair.getRight());
   }
 
   @Override
-  public String formatBestParam(Pair<Integer[], ?> pair) {
+  public String formatBestParam(Pair<int[], ?> pair) {
     return String.format("Best param is open = %d, close = %d, the %s = %.2f.",
         pair.getLeft()[0], pair.getLeft()[1], getParamSelectIndexName(), pair.getRight());
   }

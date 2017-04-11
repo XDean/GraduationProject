@@ -11,7 +11,7 @@ import xdean.graduation.model.Repo;
  * @author XDean
  *
  */
-public class KdjTrader implements Trader<Integer[]> {
+public class KdjTrader implements Trader<int[]> {
 
   private static final int DEFAULT_S = 3;
 
@@ -24,7 +24,7 @@ public class KdjTrader implements Trader<Integer[]> {
   }
 
   @Override
-  public KdjTrader setParam(Integer[] p) {
+  public KdjTrader setParam(int[] p) {
     this.kdj = new KdjExtend(p[0], p[1], p[1], DEFAULT_S);
     return this;
   }

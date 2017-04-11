@@ -1,5 +1,6 @@
 package xdean.graduation.workspace.hook;
 
+import rx.Observable;
 import xdean.graduation.handler.param.handler.ParamHandler;
 import xdean.graduation.handler.param.selector.ParamSelector;
 import xdean.graduation.handler.trader.Trader;
@@ -20,6 +21,8 @@ public interface Hook<P, T extends Trader<P>> {
   }
 
   P getParam();
+
+  Observable<P> getParams();
 
   ParamHandler<P> getParamHandler();
 

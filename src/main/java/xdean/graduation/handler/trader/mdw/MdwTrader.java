@@ -6,7 +6,7 @@ import xdean.graduation.handler.trader.TraderUtil;
 import xdean.graduation.model.Order;
 import xdean.graduation.model.Repo;
 
-public class MdwTrader implements Trader<Integer[]> {
+public class MdwTrader implements Trader<int[]> {
 
   @Getter
   Repo repo;
@@ -20,7 +20,7 @@ public class MdwTrader implements Trader<Integer[]> {
   }
 
   @Override
-  public MdwTrader setParam(Integer[] p) {
+  public MdwTrader setParam(int[] p) {
     this.open = p[0];
     this.close = p[1];
     return this;

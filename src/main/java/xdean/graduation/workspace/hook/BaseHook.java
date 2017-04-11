@@ -1,5 +1,7 @@
 package xdean.graduation.workspace.hook;
 
+import xdean.graduation.handler.param.handler.ParamHandler;
+import xdean.graduation.handler.param.handler.simple.ParamSupplier;
 import xdean.graduation.handler.param.selector.ParamSelector;
 import xdean.graduation.handler.trader.Trader;
 import xdean.graduation.index.RepoAnalyser;
@@ -17,6 +19,11 @@ public abstract class BaseHook<P, T extends Trader<P>> implements Hook<P, T> {
         result.getMaxDrawdown() * 100,
         RepoAnalyser.toString(result.getAnalysis()),
         100 * result.getRepo().getPayTaxRate());
+  }
+
+  @Override
+  public ParamHandler<P> getParamHandler() {
+    return ParamSupplier.create(this::getParams);
   }
 
   @Override

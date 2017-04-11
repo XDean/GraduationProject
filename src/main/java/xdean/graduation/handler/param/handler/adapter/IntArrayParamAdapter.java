@@ -9,7 +9,7 @@ import rx.observables.SyncOnSubscribe;
 import xdean.jex.extra.Pair;
 import xdean.jex.util.collection.ListUtil;
 
-public class IntArrayParamAdapter implements ParamAdapter<Integer[], Integer[]> {
+public class IntArrayParamAdapter implements ParamAdapter<int[], int[]> {
 
   // public static void main(String[] args) {
   // new IntArrayParamAdapter(
@@ -32,12 +32,12 @@ public class IntArrayParamAdapter implements ParamAdapter<Integer[], Integer[]> 
   }
 
   @Override
-  public Pair<Observable<Integer[]>, Integer[]> getParams() {
+  public Pair<Observable<int[]>, int[]> getParams() {
     return merge(Observable.from(intParamAdapters).map(ParamAdapter::getParams));
   }
 
   @Override
-  public Pair<Observable<Integer[]>, Integer[]> getParams(Integer[] paramResult, Integer[] precision) {
+  public Pair<Observable<int[]>, int[]> getParams(int[] paramResult, int[] precision) {
     boolean breaked = false;
     for (int i : precision) {
       if (i != 0) {
@@ -56,19 +56,19 @@ public class IntArrayParamAdapter implements ParamAdapter<Integer[], Integer[]> 
     }));
   }
 
-  private Observable<Integer[]> toObservableArray(Observable<Observable<Integer>> obs) {
-    List<Integer[]> list = obs.map(ob -> toArray(ob)).toList().toBlocking().last();
-    return Observable.create(new SyncOnSubscribe<Integer[], Integer[]>() {
+  private Observable<int[]> toObservableArray(Observable<Observable<Integer>> obs) {
+    List<int[]> list = obs.map(ob -> toArray(ob)).toList().toBlocking().last();
+    return Observable.create(new SyncOnSubscribe<int[], int[]>() {
       @Override
-      protected Integer[] generateState() {
-        Integer[] array = new Integer[list.size()];
+      protected int[] generateState() {
+        int[] array = new int[list.size()];
         Arrays.fill(array, 0);
         return array;
       }
 
       @Override
-      protected Integer[] next(Integer[] state, Observer<? super Integer[]> observer) {
-        Integer[] next = new Integer[list.size()];
+      protected int[] next(int[] state, Observer<? super int[]> observer) {
+        int[] next = new int[list.size()];
         for (int i = 0; i < next.length; i++) {
           next[i] = list.get(i)[state[i]];
         }
@@ -92,14 +92,14 @@ public class IntArrayParamAdapter implements ParamAdapter<Integer[], Integer[]> 
     });
   }
 
-  private Integer[] toArray(Observable<Integer> ob) {
+  private int[] toArray(Observable<Integer> ob) {
     List<Integer> list = ob.toList().toBlocking().last();
-    Integer[] array = new Integer[list.size()];
+    int[] array = new int[list.size()];
     ListUtil.forEach(list, (t, n) -> array[n] = t);
     return array;
   }
 
-  private Pair<Observable<Integer[]>, Integer[]> merge(Observable<Pair<Observable<Integer>, Integer>> ob) {
+  private Pair<Observable<int[]>, int[]> merge(Observable<Pair<Observable<Integer>, Integer>> ob) {
     return ob.toList()
         .map(list -> Pair.of(
             toObservableArray(Observable.from(list).map(Pair::getLeft)),

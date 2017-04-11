@@ -18,7 +18,7 @@ import xdean.graduation.io.writer.DataWriter;
 import xdean.graduation.model.Order;
 import xdean.graduation.model.Result;
 import xdean.graduation.workspace.hook.Hook;
-import xdean.graduation.workspace.hook.mdw.MdwHook;
+import xdean.graduation.workspace.hook.KdjHook;
 import xdean.graduation.workspace.optional.ParamSelectIndex;
 import xdean.jex.extra.rx.RxUtil;
 import xdean.jex.util.cache.CacheUtil;
@@ -37,9 +37,9 @@ public class Context {
   boolean TRADE_WITH_CURRENT_PRICE = false;
   double RISK_FREE = 0.05;
   private Hook<?, ?> hook =
-//      new KdjHook();
-//   new MacdHook();
-   new MdwHook();
+      new KdjHook();
+  // new MacdHook();
+  // new MdwHook();
 
   static {
     Object command = System.getProperties().get("sun.java.command");
@@ -72,7 +72,7 @@ public class Context {
   }
 
   public <T extends Trader<?>> void defaultColumns(DataWriter<Result<T>> cs) {
-    cs.addColumn("date", r->r.getOrder().getDate());
+//    cs.addColumn("date", r->r.getOrder().getDate());
     cs.addColumn("time stamp", r -> r.getOrder().getTime());
     cs.addColumn("average price", r -> r.getOrder().getAveragePrice());
     cs.addColumn("volume", r -> r.getOrder().getVolume());
