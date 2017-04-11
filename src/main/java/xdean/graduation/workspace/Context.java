@@ -3,10 +3,8 @@ package xdean.graduation.workspace;
 import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.List;
-import java.util.function.Function;
 
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
 import lombok.experimental.UtilityClass;
@@ -15,14 +13,13 @@ import rx.Scheduler;
 import xdean.graduation.handler.TimeOperator;
 import xdean.graduation.handler.VolumeOperator;
 import xdean.graduation.handler.trader.Trader;
-import xdean.graduation.index.base.Index;
-import xdean.graduation.index.base.Indexs;
 import xdean.graduation.io.writer.CsvSaver;
 import xdean.graduation.io.writer.DataWriter;
 import xdean.graduation.model.Order;
 import xdean.graduation.model.Result;
 import xdean.graduation.workspace.hook.Hook;
-import xdean.graduation.workspace.hook.MacdHook;
+import xdean.graduation.workspace.hook.KdjHook;
+import xdean.graduation.workspace.optional.ParamSelectIndex;
 import xdean.jex.extra.rx.RxUtil;
 import xdean.jex.util.cache.CacheUtil;
 
@@ -40,8 +37,8 @@ public class Context {
   boolean TRADE_WITH_CURRENT_PRICE = false;
   double RISK_FREE = 0.05;
   private Hook<?, ?> hook =
-      // new KdjHook();
-      new MacdHook();
+      new KdjHook();
+  // new MacdHook();
   // new MdwHook();
 
   static {
@@ -75,6 +72,7 @@ public class Context {
   }
 
   public <T extends Trader<?>> void defaultColumns(DataWriter<Result<T>> cs) {
+//    cs.addColumn("date", r->r.getOrder().getDate());
     cs.addColumn("time stamp", r -> r.getOrder().getTime());
     cs.addColumn("average price", r -> r.getOrder().getAveragePrice());
     cs.addColumn("volume", r -> r.getOrder().getVolume());
@@ -88,19 +86,5 @@ public class Context {
 
   public Scheduler getShareScheduler() {
     return CacheUtil.cache(Context.class, Thread.currentThread(), () -> RxUtil.fixedSizeScheduler(THREAD_COUNT));
-  }
-
-  @AllArgsConstructor
-  @FieldDefaults(level = AccessLevel.PUBLIC, makeFinal = true)
-  public enum ParamSelectIndex {
-    RR("rr",
-        acc -> Indexs.accumulateReturnRate(acc).newIn(r -> r.getRepo().getReturnRate())),
-    RRMD("rr/md",
-        acc -> Indexs.rrMaxDrawdown(acc)
-            .newOut(d -> Double.isNaN(d) || !Double.isFinite(d) ? 0 : d)
-            .newIn(r -> r.getRepo().getReturnRate()));
-
-    String name;
-    Function<Boolean, Index<? super Result<?>, Double>> index;
   }
 }

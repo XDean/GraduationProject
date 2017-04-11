@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import rx.Observable;
 import rx.Subscriber;
 import xdean.jex.extra.Pair;
-import xdean.jex.extra.rx.SimpleOperator;
+import xdean.jex.extra.rx.op.NormalOperator;
 
 /**
  * It select the best param in an Observable. So usually you may nest Observable first.
@@ -20,7 +20,7 @@ import xdean.jex.extra.rx.SimpleOperator;
  * @param <R>
  */
 @AllArgsConstructor
-public class SelectorOperator<P, R> extends SimpleOperator<Pair<P, R>, Observable<Pair<P, R>>> {
+public class SelectorOperator<P, R> extends NormalOperator<Pair<P, R>, Observable<Pair<P, R>>> {
   ParamSelector<P, R> paramSelector;
 
   @Override

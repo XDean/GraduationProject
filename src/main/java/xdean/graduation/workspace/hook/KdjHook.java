@@ -54,15 +54,20 @@ public class KdjHook extends BaseHook<int[], KdjTrader> {
   }
 
   @Override
-  public void printParam(Pair<int[], ?> pair) {
-    System.out.printf("With n = %d, l = m = %d, the %s = %.2f. %s\n",
-        pair.getLeft()[0], pair.getLeft()[1], getParamSelectIndexName(),
-        pair.getRight(), Thread.currentThread());
+  public String formatParam(int[] param) {
+    return String.format("n = %d, l = m = %d.", param[0], param[1]);
   }
 
   @Override
-  public void printParamResult(Pair<int[], ?> pair) {
-    System.out.printf("Best param is n = %d, l = m =%d, the %s = %.2f.\n",
+  public String formatParamResult(Pair<int[], ?> pair) {
+    return String.format("With param n = %d, l = m =%d, the %s = %.4f.",
+        pair.getLeft()[0], pair.getLeft()[1],
+        getParamSelectIndexName(), pair.getRight());
+  }
+
+  @Override
+  public String formatBestParam(Pair<int[], ?> pair) {
+    return String.format("Best param is n = %d, l = m =%d, the %s = %.4f.",
         pair.getLeft()[0], pair.getLeft()[1],
         getParamSelectIndexName(), pair.getRight());
   }

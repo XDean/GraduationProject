@@ -2,7 +2,7 @@ package xdean.graduation.workspace;
 
 import static xdean.graduation.workspace.Context.*;
 import static xdean.graduation.workspace.Util.*;
-import static xdean.jex.util.task.TaskUtil.*;
+import static xdean.jex.util.task.TaskUtil.uncheck;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -17,16 +17,14 @@ import rx.Observable;
 import rx.Single;
 import xdean.graduation.handler.IndexOperator;
 import xdean.graduation.handler.trader.Trader;
-import xdean.graduation.index.MaxDrawdown;
-import xdean.graduation.index.RepoAnalyser;
-import xdean.graduation.index.base.DoubleIndex;
-import xdean.graduation.index.base.Indexs;
-import xdean.graduation.io.writer.CsvSaver;
 import xdean.graduation.model.Order;
 import xdean.graduation.model.Repo;
 import xdean.graduation.model.Result;
 import xdean.jex.extra.Pair;
-import xdean.jex.extra.rx.ContinuousGroupOperator;
+import xdean.jex.extra.collection.FixedLengthList;
+import xdean.jex.extra.rx.op.BothOperator;
+import xdean.jex.extra.rx.op.ContinuousGroupOperator;
+import xdean.jex.extra.rx.op.FunctionOperator;
 import xdean.jex.util.TimeUtil;
 
 @UtilityClass
@@ -60,107 +58,96 @@ public class IF01WorkSpace {
       }
       break;
     }
+    ;
   }
 
   /*************
    * Ju Bo Hua *
    *************/
-  @SneakyThrows(IOException.class)
-  Observable<Integer> simpleJBH(Path file, Repo repo) {
-
-    DoubleIndex accumulRR = Indexs.product();
-    DoubleIndex accumulTax = Indexs.sum();
-    DoubleIndex annualRR = Indexs.annualizedReturn();
-    DoubleIndex annualSR = Indexs.annualizedSharpRatio(RISK_FREE, false);
-    DoubleIndex annualSD = Indexs.annualizedStandardDeviation();
-    MaxDrawdown md = Indexs.maxDrawdown(false);
-    RepoAnalyser ra = new RepoAnalyser();
-    CsvSaver<Result<Trader<Object>>> dailySaver = new CsvSaver<>(Files.newOutputStream(getDailyOutputFile(file)));
-    dailySaver.addColumn("date", r -> r.getOrder().getDate());
-    dailySaver.addColumn("price", r -> r.getOrder().getCurrentPrice());
-    dailySaver.addColumn("rr", r -> r.getRepo().getReturnRate());
-    dailySaver.addColumn("accumulRR", r -> accumulRR.get() - 1);
-    dailySaver.addColumn("accumulTax", accumulTax);
-    dailySaver.start();
-
-    Path output = getOutputFile(file);
-    uncatch(() -> Files.delete(output));
-    Files.createFile(output);
+  Observable<Result<Trader<Object>>> simpleJBH(Path file, Repo repo) {
     return getReader().toObservable(file)
-        .lift(new ContinuousGroupOperator<>(o -> o.getDate()))
+        .lift(new ContinuousGroupOperator<>(Order::getDate))
+        .map(IF01WorkSpace::skipAndOp)
         .doOnNext(o -> System.out.printf("Calc %s data.\n", o.getLeft()))
         .concatMap(o ->
             indaySave(
-                Observable.from(o.getRight()).skip(1),
-                uncheck(() -> Files.newOutputStream(output, StandardOpenOption.APPEND)),
-                getHook().createTraderWithParam(repo.copy())
-            )
-                .toObservable()
-                .doOnNext(r -> ra.merge(r.getAnalysis()))
-                .doOnNext(r -> md.accept(r.getRepo().getReturnRate()))
-                .doOnNext(r -> accumulRR.accept(1 + r.getRepo().getReturnRate()))
-                .doOnNext(r -> accumulTax.accept(r.getRepo().getPayTaxRate()))
-                .doOnNext(r -> annualRR.accept(r.getRepo().getReturnRate()))
-                .doOnNext(r -> annualSR.accept(r.getRepo().getReturnRate()))
-                .doOnNext(r -> annualSD.accept(r.getRepo().getReturnRate()))
-                .doOnNext(r -> System.out.printf("Pay tax: %.2f%%\n", 100 * r.getRepo().getPayTaxRate()))
-                .doOnNext(dailySaver::row)
-                .doOnCompleted(() -> System.out.println("-----------------------------------------------")))
-        .count()
-        .doOnCompleted(dailySaver::end)
-        .doOnNext(r -> System.out.println("Summary:"))
-        .doOnNext(r -> System.out.printf("Total %d trading days.\n", r))
-        .doOnNext(r -> System.out.printf("Accumulated return rate: %.2f%%\n", 100 * (accumulRR.get() - 1)))
-        .doOnNext(r -> System.out.printf("Max drawdown: %.2f%%\n", 100 * md.get()))
-        .doOnNext(r -> System.out.printf("Return rate / Max drawdown: %.2f\n", (accumulRR.get() - 1) / md.get()))
-        .doOnNext(r -> System.out.printf("Annual return rate: %.2f%%\n", 100 * annualRR.get()))
-        .doOnNext(r -> System.out.printf("Annualized standard deviation : %.2f%%\n", 100 * annualSD.get()))
-        .doOnNext(r -> System.out.printf("Annual sharp ratio: %.2f\n", annualSR.get()))
-        .doOnNext(r -> System.out.printf("Accumulated pay tax: %.2f%%\n", 100 * accumulTax.get()))
-        .doOnNext(r -> System.out.println(ra))
-        .doOnCompleted(() -> System.out.println("-----------------------------------------------"));
+                o.getRight(),
+                uncheck(() -> Files.newOutputStream(getOutputFile(file), StandardOpenOption.APPEND)),
+                getHook().createTraderWithParam(repo.copy()))
+                .toObservable())
+        .doOnNext(p -> System.out.println(getHook().formatIndayResult(p)))
+        .lift(new FunctionOperator<>(o -> saveDailyData(o, file)));
   }
 
   Single<Pair<Object, Double>> paramSelectJBH(Path file, Repo repo) {
-    Observable<Pair<String, List<Order>>> ob = getReader()
+    Observable<Pair<String, Observable<Order>>> ob = getReader()
         .toObservable(file)
-        .lift(new ContinuousGroupOperator<>(Order::getDate));
+        .lift(new ContinuousGroupOperator<>(Order::getDate))
+        .map(IF01WorkSpace::skipAndOp);
     return paramResult(
         ob,
         getHook().getParamHandler(),
         getHook().getParamSelector(),
         (o, p) -> paramToResultJBH(repo.copy(), o, p))
-        .doOnSuccess(getHook()::printParamResult);
+        .doOnSuccess(p -> System.out.println(getHook().formatBestParam(p)));
   }
 
-  Observable<Pair<String, Pair<Object, Double>>> paramIterateJBH(Path file, Repo repo) {
-    return getReader().toObservable(file)
-        .lift(new ContinuousGroupOperator<String, Order>(o -> o.getName()))// split by name
+  Observable<Result<Trader<Object>>> paramIterateJBH(Path file, Repo repo) {
+    FixedLengthList<Observable<Order>> list = new FixedLengthList<>(5);
+    // Observable<Order> accumulateOrder = Observable.empty();
+    return getReader()
+        .toObservable(file)
+        .lift(new ContinuousGroupOperator<String, Order>(o -> o.getDate()))
+        // .takeUntil(p->p.getLeft().equals("20170106"))
+        .map(IF01WorkSpace::skipAndOp)
+        .doOnNext(p -> list.add(p.getRight()))
         .map(pair ->
-            pair.right(
+            Pair.of(pair,
                 paramResult(
-                    Observable.from(pair.getRight()).lift(new ContinuousGroupOperator<>(Order::getDate)),
+                    Observable.from(list)
+                        .concatMap(o -> o)
+                        .lift(new ContinuousGroupOperator<>(Order::getDate))
+                        .<Pair<String, Observable<Order>>> map(p -> p.right(Observable.from(p.getRight()))),
                     getHook().getParamHandler(),
                     getHook().getParamSelector(),
                     (o, p) -> paramToResultJBH(repo.copy(), o, p)
                 ).toBlocking().value()))
-        .toList()
-        .flatMap(Observable::from)
-        .doOnNext(p -> System.out.printf("In %s, ", p.getLeft()))
-        .doOnNext(p -> getHook().printParamResult(p.getRight()));
+        // ((name, data), (param, result))
+        .doOnNext(p -> System.out.printf("In %s, ", p.getLeft().getLeft()))
+        .doOnNext(p -> System.out.println(getHook().formatBestParam(p.getRight())))
+        .doOnNext(p -> splitLine(false))
+        .lift(new BothOperator<>())
+        .doOnNext(p -> System.out.printf("Back test %s with param %s\n",
+            p.getRight().getLeft().getLeft(),
+            getHook().formatParam(p.getLeft().getRight().getLeft())))
+        .concatMap(p -> indaySave(
+            p.getRight().getLeft().getRight(),
+            uncheck(() -> Files.newOutputStream(getOutputFile(file), StandardOpenOption.APPEND)),
+            getHook().createTrader(repo.copy()).setParam(p.getLeft().getRight().getLeft()))
+            .toObservable())
+        .doOnNext(p -> System.out.println(getHook().formatIndayResult(p)))
+        .lift(new FunctionOperator<>(o -> saveDailyData(o, file)));
   }
 
-  private Single<Double> paramToResultJBH(Repo repo, Observable<Pair<String, List<Order>>> o,
+  private Single<Double> paramToResultJBH(Repo repo, Observable<Pair<String, Observable<Order>>> o,
       Object param) {
-    return o.concatMap(
-        pair -> inday(
-            Observable.from(pair.getRight()).skip(1),
-            getHook().createTrader(repo.copy()).setParam(param))
-            .last()
+    return o
+        .concatMap(
+            pair -> inday(
+                pair.getRight(),
+                getHook().createTrader(repo.copy()).setParam(param))
+                .last()
         )
-        .lift(new IndexOperator<>(() -> getHook().getResultIndex(false)))
-        .toSingle()
-        .doOnSuccess(r -> getHook().printParam(Pair.of(param, r)));
+        .lift(IndexOperator.create(() -> getHook().getResultIndex(false)))
+        // .doOnNext(r -> System.out.println(getHook().formatParamResult(Pair.of(param, r))))
+        .toSingle();
+  }
+
+  private Pair<String, Observable<Order>> skipAndOp(Pair<String, List<Order>> pair) {
+    return pair.right(
+        Observable.from(pair.getRight())
+            .skip(1)
+            .lift(Context.OPERATER));
   }
 
   /*************
@@ -171,7 +158,8 @@ public class IF01WorkSpace {
     return indaySave(
         getReader().toObservable(file),
         Files.newOutputStream(getOutputFile(file)),
-        getHook().createTraderWithParam(repo.copy()));
+        getHook().createTraderWithParam(repo.copy()))
+        .doOnSuccess(p -> System.out.println(getHook().formatIndayResult(p)));
   }
 
   Single<Pair<Object, Double>> paramTR(Path file, Repo repo) {

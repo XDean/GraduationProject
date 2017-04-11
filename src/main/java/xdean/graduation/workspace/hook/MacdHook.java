@@ -42,7 +42,7 @@ public class MacdHook extends BaseHook<int[], MacdTrader> {
   public ParamHandler<int[]> getParamHandler() {
     return new IntArrayParamAdapter(
         new IntParamAdapter(10, 500, 50, 5),
-        new IntParamAdapter(100, 500, 50, 5),
+        new IntParamAdapter(200, 200, 50, 5),
         new IntParamAdapter(10, 500, 50, 5));
   }
 
@@ -56,15 +56,19 @@ public class MacdHook extends BaseHook<int[], MacdTrader> {
   }
 
   @Override
-  public void printParam(Pair<int[], ?> pair) {
-    System.out.printf("With f = %d, s = %d, a = %d, the %s = %.2f. %s\n",
+  public String formatParam(int[] param) {
+    return String.format("f = %d, s = %d, a = %d.", param[0], param[1], param[2]);
+  }
+  @Override
+  public String formatParamResult(Pair<int[], ?> pair) {
+    return String.format("With param f = %d, s = %d, a = %d, the %s = %.2f.",
         pair.getLeft()[0], pair.getLeft()[1], pair.getLeft()[2],
-        getParamSelectIndexName(), pair.getRight(), Thread.currentThread());
+        getParamSelectIndexName(), pair.getRight());
   }
 
   @Override
-  public void printParamResult(Pair<int[], ?> pair) {
-    System.out.printf("Best param is f = %d, s = %d, a = %d, the %s = %.2f.\n",
+  public String formatBestParam(Pair<int[], ?> pair) {
+    return String.format("Best param is f = %d, s = %d, a = %d, the %s = %.2f.",
         pair.getLeft()[0], pair.getLeft()[1], pair.getLeft()[2],
         getParamSelectIndexName(), pair.getRight());
   }

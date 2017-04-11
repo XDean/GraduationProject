@@ -32,9 +32,11 @@ public interface Hook<P, T extends Trader<P>> {
 
   void extraColumns(DataWriter<Result<T>> writer);
 
-  void printParam(Pair<P, ?> pair);
+  String formatParam(P param);
 
-  void printParamResult(Pair<P, ?> pair);
+  String formatParamResult(Pair<P, ?> pair);
 
-  void pirntIndayResult(Result<T> result);
+  String formatBestParam(Pair<P, ?> pair);
+
+  String formatIndayResult(Result<T> result);
 }

@@ -10,7 +10,7 @@ import xdean.graduation.handler.param.selector.ParamSelector;
 import xdean.graduation.handler.param.selector.SelectorOperator;
 import xdean.graduation.workspace.Context;
 import xdean.jex.extra.Pair;
-import xdean.jex.extra.rx.ParallelOperator;
+import xdean.jex.extra.rx.op.ParallelOperator;
 
 public interface ParamSupplier<P> extends ParamHandler<P> {
 
