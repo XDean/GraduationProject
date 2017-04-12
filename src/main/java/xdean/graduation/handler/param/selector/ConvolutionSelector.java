@@ -13,6 +13,7 @@ import rx.Single;
 import xdean.jex.extra.Pair;
 import xdean.jex.extra.rx.op.FunctionOperator;
 import xdean.jex.util.calc.MathUtil;
+import xdean.jex.util.lang.ArrayUtil;
 
 import com.google.common.collect.TreeMultimap;
 import com.google.common.util.concurrent.AtomicDouble;
@@ -64,7 +65,7 @@ public class ConvolutionSelector implements ParamSelector<int[], Double> {
     TreeMultimap<Integer, Pair<int[], Double>>[] views = new TreeMultimap[dimension];
     for (int i = 0; i < dimension; i++) {
       TreeMultimap<Integer, Pair<int[], Double>> view = TreeMultimap.create(Comparator.naturalOrder(),
-          (p1, p2) -> Double.compare(p1.getRight(), p2.getRight()));
+          (p1, p2) -> ArrayUtil.compare(p1.getLeft(), p2.getLeft()));
       views[i] = view;
       for (Pair<int[], Double> pair : list) {
         view.put(pair.getLeft()[i], pair);
@@ -78,10 +79,10 @@ public class ConvolutionSelector implements ParamSelector<int[], Double> {
           return Observable.just(Observable.range(-maxDistance, maxDistance * 2 + 1))
               .repeat(dimension)
               .lift(FunctionOperator.of(MathUtil::cartesianProduct))
-              .map(array -> {
+              .map(point -> {
                 Set<Pair<int[], Double>> targetSet = new HashSet<>();
                 for (int i = 0; i < dimension; i++) {
-                  Integer d = get(views[i].keySet(), param[i], array[i]);
+                  Integer d = get(views[i].keySet(), param[i], point[i]);
                   if (d == null) {
                     return 0d;
                   }
@@ -96,7 +97,7 @@ public class ConvolutionSelector implements ParamSelector<int[], Double> {
                   }
                 }
                 Pair<int[], Double> theParam = targetSet.stream().findFirst().get();
-                double weight = sqrDistanceToWeight.apply(MathUtil.squareSum(array));
+                double weight = sqrDistanceToWeight.apply(MathUtil.squareSum(point));
                 weightSum.addAndGet(weight);
                 return weight * theParam.getRight().doubleValue();
               })
@@ -110,8 +111,8 @@ public class ConvolutionSelector implements ParamSelector<int[], Double> {
                   throw new UnsupportedOperationException();
                 }
               })
-//              .doOnNext(d -> System.out.println(Arrays.toString(pair.getLeft()) + ", " + weightSum.get() + ", " +
-//                  pair.getRight() + ", " + d))
+              // .doOnNext(d -> System.out.println(Arrays.toString(pair.getLeft()) + ", " + weightSum.get() + ", " +
+              // pair.getRight() + ", " + d))
               .map(c -> Pair.of(pair, c));
         });
   }

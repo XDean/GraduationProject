@@ -179,7 +179,7 @@ public class Util {
 
   DataReader<Path, Order> getReader() {
     return CacheUtil.<DataReader<Path, Order>> cache(
-        IF01WorkSpace.class,
+        WorkSpace.class,
         "dataReader",
         () -> new DataReader<Path, Order>() {
           public DataReader<Path, Order> choose(Path data) {
