@@ -5,7 +5,7 @@ import rx.Observable;
 public abstract class BaseReader<C, S> implements DataReader<C, S> {
 
   @Override
-  public Observable<S> toObservable(C data) {
+  public Observable<S> read(C data) {
     return convert(Observable.just(data));
   }
 

@@ -5,7 +5,9 @@ import rx.Observable;
 import xdean.graduation.handler.param.handler.ParamHandler;
 import xdean.graduation.handler.param.handler.adapter.IntArrayParamAdapter;
 import xdean.graduation.handler.param.handler.adapter.IntParamAdapter;
+import xdean.graduation.handler.param.selector.ConvolutionSelector;
 import xdean.graduation.handler.param.selector.ParamSelector;
+import xdean.graduation.handler.param.selector.ConvolutionSelector.WeightPolicy;
 import xdean.graduation.handler.trader.KdjTrader;
 import xdean.graduation.io.writer.DataWriter;
 import xdean.graduation.model.Repo;
@@ -42,7 +44,7 @@ public class KdjHook extends BaseHook<int[], KdjTrader> {
 
   @Override
   public ParamSelector<int[], Double> getParamSelector() {
-    return ParamSelector.natural();// TODO
+    return new ConvolutionSelector(WeightPolicy.CENTER, 1, sqrDis -> sqrDis == 0 ? 0 : 1d / sqrDis);
   }
 
   @Override

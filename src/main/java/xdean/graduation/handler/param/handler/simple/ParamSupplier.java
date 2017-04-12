@@ -7,9 +7,9 @@ import rx.Observable;
 import rx.Single;
 import xdean.graduation.handler.param.handler.ParamHandler;
 import xdean.graduation.handler.param.selector.ParamSelector;
-import xdean.graduation.handler.param.selector.SelectorOperator;
 import xdean.graduation.workspace.Context;
 import xdean.jex.extra.Pair;
+import xdean.jex.extra.rx.op.FunctionOperator;
 import xdean.jex.extra.rx.op.ParallelOperator;
 
 public interface ParamSupplier<P> extends ParamHandler<P> {
@@ -21,9 +21,7 @@ public interface ParamSupplier<P> extends ParamHandler<P> {
     return getParams()
         .lift(new ParallelOperator<>(Context.getShareScheduler()))
         .map(p -> Pair.of(p, func.apply(p)))
-        .nest()
-        .lift(new SelectorOperator<>(selector))
-        .last()
+        .lift(FunctionOperator.of(ob -> selector.select(ob).toObservable()))
         .toSingle();
   }
 

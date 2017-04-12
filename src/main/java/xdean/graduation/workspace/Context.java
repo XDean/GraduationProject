@@ -72,7 +72,7 @@ public class Context {
   }
 
   public <T extends Trader<?>> void defaultColumns(DataWriter<Result<T>> cs) {
-//    cs.addColumn("date", r->r.getOrder().getDate());
+    cs.addColumn("date", r->r.getOrder().getDate());
     cs.addColumn("time stamp", r -> r.getOrder().getTime());
     cs.addColumn("average price", r -> r.getOrder().getAveragePrice());
     cs.addColumn("volume", r -> r.getOrder().getVolume());

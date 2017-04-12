@@ -1,28 +1,13 @@
 package xdean.graduation.handler.param.handler.adapter;
 
-import java.util.Arrays;
 import java.util.List;
 
 import rx.Observable;
-import rx.Observer;
-import rx.observables.SyncOnSubscribe;
 import xdean.jex.extra.Pair;
+import xdean.jex.util.calc.MathUtil;
 import xdean.jex.util.collection.ListUtil;
 
 public class IntArrayParamAdapter implements ParamAdapter<int[], int[]> {
-
-  // public static void main(String[] args) {
-  // new IntArrayParamAdapter(
-  // new IntParamAdapter(1, 100, 10, 10),
-  // new IntParamAdapter(1, 100, 10, 10),
-  // new IntParamAdapter(1, 100, 10, 10))
-  // .select(i -> {
-  // System.out.println(Arrays.toString(i));
-  // return i[0] / i[1] + i[1] / i[0];
-  // })
-  // .doOnSuccess(s -> System.out.println(s))
-  // .subscribe();
-  // }
 
   ParamAdapter<Integer, Integer>[] intParamAdapters;
 
@@ -56,42 +41,6 @@ public class IntArrayParamAdapter implements ParamAdapter<int[], int[]> {
     }));
   }
 
-  private Observable<int[]> toObservableArray(Observable<Observable<Integer>> obs) {
-    List<int[]> list = obs.map(ob -> toArray(ob)).toList().toBlocking().last();
-    return Observable.create(new SyncOnSubscribe<int[], int[]>() {
-      @Override
-      protected int[] generateState() {
-        int[] array = new int[list.size()];
-        Arrays.fill(array, 0);
-        return array;
-      }
-
-      @Override
-      protected int[] next(int[] state, Observer<? super int[]> observer) {
-        int[] next = new int[list.size()];
-        for (int i = 0; i < next.length; i++) {
-          next[i] = list.get(i)[state[i]];
-        }
-        observer.onNext(next);
-        state[state.length - 1]++;
-        for (int i = state.length - 1; i >= 0; i--) {
-          int delta = list.get(i).length - state[i];
-          if (delta > 0) {
-            break;
-          } else if (delta == 0) {
-            state[i] = 0;
-            if (i == 0) {
-              observer.onCompleted();
-              break;
-            }
-            state[i - 1]++;
-          }
-        }
-        return state;
-      }
-    });
-  }
-
   private int[] toArray(Observable<Integer> ob) {
     List<Integer> list = ob.toList().toBlocking().last();
     int[] array = new int[list.size()];
@@ -102,7 +51,7 @@ public class IntArrayParamAdapter implements ParamAdapter<int[], int[]> {
   private Pair<Observable<int[]>, int[]> merge(Observable<Pair<Observable<Integer>, Integer>> ob) {
     return ob.toList()
         .map(list -> Pair.of(
-            toObservableArray(Observable.from(list).map(Pair::getLeft)),
+            MathUtil.cartesianProduct(Observable.from(list).map(Pair::getLeft)),
             toArray(Observable.from(list).map(Pair::getRight))))
         .toBlocking()
         .last();

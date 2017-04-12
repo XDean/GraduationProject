@@ -4,6 +4,6 @@ import rx.Observable;
 
 public interface DataReader<C, S> {
 
-  Observable<S> toObservable(C data);
+  Observable<S> read(C data);
   
 }

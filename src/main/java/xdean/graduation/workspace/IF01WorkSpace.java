@@ -2,7 +2,7 @@ package xdean.graduation.workspace;
 
 import static xdean.graduation.workspace.Context.*;
 import static xdean.graduation.workspace.Util.*;
-import static xdean.jex.util.task.TaskUtil.uncheck;
+import static xdean.jex.util.task.TaskUtil.*;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -64,24 +64,28 @@ public class IF01WorkSpace {
   /*************
    * Ju Bo Hua *
    *************/
+  @SneakyThrows(IOException.class)
   Observable<Result<Trader<Object>>> simpleJBH(Path file, Repo repo) {
-    return getReader().toObservable(file)
+    Path output = getOutputFile(file);
+    uncatch(() -> Files.delete(output));
+    Files.createFile(output);
+    return getReader().read(file)
         .lift(new ContinuousGroupOperator<>(Order::getDate))
         .map(IF01WorkSpace::skipAndOp)
         .doOnNext(o -> System.out.printf("Calc %s data.\n", o.getLeft()))
         .concatMap(o ->
             indaySave(
                 o.getRight(),
-                uncheck(() -> Files.newOutputStream(getOutputFile(file), StandardOpenOption.APPEND)),
+                uncheck(() -> Files.newOutputStream(output, StandardOpenOption.APPEND)),
                 getHook().createTraderWithParam(repo.copy()))
                 .toObservable())
         .doOnNext(p -> System.out.println(getHook().formatIndayResult(p)))
-        .lift(new FunctionOperator<>(o -> saveDailyData(o, file)));
+        .lift(FunctionOperator.of(o -> saveDailyData(o, file)));
   }
 
   Single<Pair<Object, Double>> paramSelectJBH(Path file, Repo repo) {
     Observable<Pair<String, Observable<Order>>> ob = getReader()
-        .toObservable(file)
+        .read(file)
         .lift(new ContinuousGroupOperator<>(Order::getDate))
         .map(IF01WorkSpace::skipAndOp);
     return paramResult(
@@ -92,11 +96,14 @@ public class IF01WorkSpace {
         .doOnSuccess(p -> System.out.println(getHook().formatBestParam(p)));
   }
 
+  @SneakyThrows(IOException.class)
   Observable<Result<Trader<Object>>> paramIterateJBH(Path file, Repo repo) {
     FixedLengthList<Observable<Order>> list = new FixedLengthList<>(5);
-    // Observable<Order> accumulateOrder = Observable.empty();
+    Path output = getOutputFile(file);
+    uncatch(() -> Files.delete(output));
+    Files.createFile(output);
     return getReader()
-        .toObservable(file)
+        .read(file)
         .lift(new ContinuousGroupOperator<String, Order>(o -> o.getDate()))
         // .takeUntil(p->p.getLeft().equals("20170106"))
         .map(IF01WorkSpace::skipAndOp)
@@ -122,11 +129,11 @@ public class IF01WorkSpace {
             getHook().formatParam(p.getLeft().getRight().getLeft())))
         .concatMap(p -> indaySave(
             p.getRight().getLeft().getRight(),
-            uncheck(() -> Files.newOutputStream(getOutputFile(file), StandardOpenOption.APPEND)),
+            uncheck(() -> Files.newOutputStream(output, StandardOpenOption.APPEND)),
             getHook().createTrader(repo.copy()).setParam(p.getLeft().getRight().getLeft()))
             .toObservable())
         .doOnNext(p -> System.out.println(getHook().formatIndayResult(p)))
-        .lift(new FunctionOperator<>(o -> saveDailyData(o, file)));
+        .lift(FunctionOperator.of(o -> saveDailyData(o, file)));
   }
 
   private Single<Double> paramToResultJBH(Repo repo, Observable<Pair<String, Observable<Order>>> o,
@@ -156,7 +163,7 @@ public class IF01WorkSpace {
   @SneakyThrows(IOException.class)
   Single<Result<Trader<Object>>> simpleTR(Path file, Repo repo) {
     return indaySave(
-        getReader().toObservable(file),
+        getReader().read(file),
         Files.newOutputStream(getOutputFile(file)),
         getHook().createTraderWithParam(repo.copy()))
         .doOnSuccess(p -> System.out.println(getHook().formatIndayResult(p)));
@@ -164,7 +171,7 @@ public class IF01WorkSpace {
 
   Single<Pair<Object, Double>> paramTR(Path file, Repo repo) {
     return inDayParamResult(
-        getReader().toObservable(file),
+        getReader().read(file),
         getHook().getParamHandler(),
         () -> getHook().createTrader(repo.copy()),
         getHook().getResultIndex(true));

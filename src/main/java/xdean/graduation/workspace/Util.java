@@ -1,7 +1,6 @@
 package xdean.graduation.workspace;
 
 import static xdean.graduation.workspace.Context.RISK_FREE;
-import static xdean.jex.util.task.TaskUtil.uncatch;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -75,8 +74,8 @@ public class Util {
    */
   <P, T extends Trader<P>> Single<Result<T>> indaySave(Observable<Order> ob, OutputStream output, T trader) {
     return ob
-        .lift(new FunctionOperator<Result<T>, Order>(o -> inday(o, trader)))
-        .lift(new FunctionOperator<Result<T>, Result<T>>(o -> save(o, output, Context.<P, T> getHook()::extraColumns)))
+        .lift(FunctionOperator.of(o -> inday(o, trader)))
+        .lift(FunctionOperator.of(o -> save(o, output, Context.<P, T> getHook()::extraColumns)))
         .last()
         .toSingle();
     // save(
@@ -209,8 +208,8 @@ public class Util {
           }
 
           @Override
-          public Observable<Order> toObservable(Path data) {
-            return choose(data).toObservable(data);
+          public Observable<Order> read(Path data) {
+            return choose(data).read(data);
           }
         });
   }
@@ -222,10 +221,7 @@ public class Util {
   }
 
   public Path getOutputFile(Path file) throws IOException {
-    Path output = Paths.get("output", FileUtil.getNameWithoutSuffix(file) + ".output.csv");
-    uncatch(() -> Files.delete(output));
-    Files.createFile(output);
-    return output;
+    return Paths.get("output", FileUtil.getNameWithoutSuffix(file) + ".output.csv");
   }
 
   public Path getDailyOutputFile(Path file) {

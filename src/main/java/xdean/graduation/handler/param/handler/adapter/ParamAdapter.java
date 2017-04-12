@@ -5,12 +5,10 @@ import java.util.function.Function;
 import lombok.extern.slf4j.Slf4j;
 import rx.Observable;
 import rx.Single;
+import rx.schedulers.Schedulers;
 import xdean.graduation.handler.param.handler.ParamHandler;
 import xdean.graduation.handler.param.selector.ParamSelector;
-import xdean.graduation.workspace.Context;
 import xdean.jex.extra.Pair;
-import xdean.jex.extra.rx.ParallelReplayOnSubscribe;
-import xdean.jex.extra.rx.op.ParallelOperator;
 
 public interface ParamAdapter<P, T> extends ParamHandler<P> {
   /**
@@ -39,16 +37,18 @@ public interface ParamAdapter<P, T> extends ParamHandler<P> {
       P bestParam = null;
       while (pair.getRight().equals(oldPrecision) == false) {
         Observable<Pair<P, Result>> ob = pair.getLeft()
-            .lift(new ParallelOperator<>(Context.getShareScheduler()))
-            .map(i -> Pair.of(i, func.apply(i)));
+            // .lift(new ParallelOperator<>(Context.getShareScheduler()))
+            .flatMap(o -> Observable.just(o)
+                .observeOn(Schedulers.computation())
+                .map(i -> Pair.of(i, func.apply(i))));
         // If don't perform this, some elements will lose, why?
-        ob = ParallelReplayOnSubscribe.create(ob);
-        result = selector.select(ob);
+        // ob = ParallelReplayOnSubscribe.create(ob);
+        result = selector.select(ob).toBlocking().value();
         bestParam = result.getLeft();
         oldPrecision = pair.getRight();
 
-        Log.log.debug("Best param is {}, result is {}, Next precision {}.",
-            bestParam, result.getRight(), oldPrecision);
+        // Log.log.debug("Best param is {}, result is {}, Next precision {}.",
+        // bestParam, result.getRight(), oldPrecision);
         pair = getParams(bestParam, pair.getRight());
       }
       s.onSuccess(result);
@@ -57,5 +57,8 @@ public interface ParamAdapter<P, T> extends ParamHandler<P> {
 
   @Slf4j
   static class Log {
+    static {
+      log.getClass();
+    }
   }
 }
