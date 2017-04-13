@@ -1,16 +1,26 @@
 package xdean.graduation.workspace.hook;
 
-import xdean.graduation.handler.param.handler.ParamHandler;
-import xdean.graduation.handler.param.handler.simple.ParamSupplier;
 import xdean.graduation.handler.param.selector.ParamSelector;
+import xdean.graduation.handler.trader.PositionPolicy;
 import xdean.graduation.handler.trader.Trader;
 import xdean.graduation.index.RepoAnalyser;
 import xdean.graduation.index.base.Index;
 import xdean.graduation.index.base.Indexs;
+import xdean.graduation.model.Repo;
 import xdean.graduation.model.Result;
 import xdean.graduation.workspace.Context;
 
 public abstract class BaseHook<P, T extends Trader<P>> implements Hook<P, T> {
+  
+  @Override
+  public final T createTrader(Repo repo) {
+    T t = create(repo);
+    t.setPositionPolicy(getPositionPolicy());
+    return t;
+  }
+
+  protected abstract T create(Repo repo);
+
   @Override
   public String formatIndayResult(Result<T> result) {
     return String.format("Return rate: %.2f%%, annualized: %.2f%%, max drawdown %.2f%%.\n%s\nPay tax: %.2f%%",
@@ -19,11 +29,6 @@ public abstract class BaseHook<P, T extends Trader<P>> implements Hook<P, T> {
         result.getMaxDrawdown() * 100,
         RepoAnalyser.toString(result.getAnalysis()),
         100 * result.getRepo().getPayTaxRate());
-  }
-
-  @Override
-  public ParamHandler<P> getParamHandler() {
-    return ParamSupplier.create(this::getParams);
   }
 
   @Override
@@ -38,5 +43,9 @@ public abstract class BaseHook<P, T extends Trader<P>> implements Hook<P, T> {
 
   protected String getParamSelectIndexName() {
     return Context.PARAM_INDEX.getName();
+  }
+
+  protected PositionPolicy getPositionPolicy() {
+    return Context.DEFAULT_POLICY;
   }
 }

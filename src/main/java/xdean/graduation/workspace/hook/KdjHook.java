@@ -1,13 +1,11 @@
 package xdean.graduation.workspace.hook;
 
-import static xdean.jex.extra.rx.RxUtil.*;
-import rx.Observable;
 import xdean.graduation.handler.param.handler.ParamHandler;
 import xdean.graduation.handler.param.handler.adapter.IntArrayParamAdapter;
 import xdean.graduation.handler.param.handler.adapter.IntParamAdapter;
 import xdean.graduation.handler.param.selector.ConvolutionSelector;
-import xdean.graduation.handler.param.selector.ParamSelector;
 import xdean.graduation.handler.param.selector.ConvolutionSelector.WeightPolicy;
+import xdean.graduation.handler.param.selector.ParamSelector;
 import xdean.graduation.handler.trader.KdjTrader;
 import xdean.graduation.io.writer.DataWriter;
 import xdean.graduation.model.Repo;
@@ -18,21 +16,13 @@ import xdean.jex.extra.Pair;
 public class KdjHook extends BaseHook<int[], KdjTrader> {
 
   @Override
-  public KdjTrader createTrader(Repo repo) {
+  public KdjTrader create(Repo repo) {
     return new KdjTrader(repo);
   }
 
   @Override
   public int[] getParam() {
     return Context.USE_TIME ? new int[] { 3000, 500 } : new int[] { 150, 100 };
-  }
-
-  @Override
-  public Observable<int[]> getParams() {
-    return (Context.USE_TIME ?
-        cross(range(1000, 5000, 400), range(100, 1000, 100)) :
-        cross(range(100, 500, 50), range(10, 200, 20)))
-        .map(p -> new int[] { p.getLeft(), p.getRight() });
   }
 
   @Override
@@ -44,7 +34,7 @@ public class KdjHook extends BaseHook<int[], KdjTrader> {
 
   @Override
   public ParamSelector<int[], Double> getParamSelector() {
-    return new ConvolutionSelector(WeightPolicy.CENTER, 1, sqrDis -> sqrDis == 0 ? 0 : 1d / sqrDis);
+    return new ConvolutionSelector(WeightPolicy.CENTER, 1, sqrDis -> sqrDis == 0 ? 0 : 1d / 8);
   }
 
   @Override

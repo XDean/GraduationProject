@@ -7,12 +7,30 @@ import xdean.graduation.workspace.Context;
 
 @UtilityClass
 public class TraderUtil {
+
+  public double adjustByHistogram(double oldHistogram, double histogram, PositionPolicy policy) {
+    double delta = histogram - oldHistogram;
+    if (histogram > 0) {
+      if (delta > 0) {
+        return policy.open(delta);
+      } else {
+        return -policy.close(-delta);
+      }
+    } else if (histogram < 0) {
+      if (delta < 0) {
+        return -policy.open(-delta);
+      } else {
+        return policy.close(delta);
+      }
+    } else {
+      return 0;
+    }
+  }
+
   /**
-   * 
    * @param repo
    * @param order
-   * @param position
-   *          the position adjust to, do nothing if NaN
+   * @param position the position adjust to, do nothing if NaN
    */
   public void tradeByPosition(Repo repo, Order order, double position) {
     if (Double.isNaN(position) == false) {

@@ -33,11 +33,6 @@
 			<artifactId>Java-EX</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
-		<dependency>
-			<groupId>xdean</groupId>
-			<artifactId>JavaFX-EX</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
-		</dependency>
 	</dependencies>
 
 	<build>

@@ -12,13 +12,14 @@ import rx.Observable.Operator;
 import rx.Scheduler;
 import xdean.graduation.handler.TimeOperator;
 import xdean.graduation.handler.VolumeOperator;
+import xdean.graduation.handler.trader.PositionPolicy;
 import xdean.graduation.handler.trader.Trader;
 import xdean.graduation.io.writer.CsvSaver;
 import xdean.graduation.io.writer.DataWriter;
 import xdean.graduation.model.Order;
 import xdean.graduation.model.Result;
 import xdean.graduation.workspace.hook.Hook;
-import xdean.graduation.workspace.hook.KdjHook;
+import xdean.graduation.workspace.hook.MacdHook;
 import xdean.graduation.workspace.optional.ParamSelectIndex;
 import xdean.jex.extra.rx.RxUtil;
 import xdean.jex.util.cache.CacheUtil;
@@ -37,8 +38,8 @@ public class Context {
   boolean TRADE_WITH_CURRENT_PRICE = false;
   double RISK_FREE = 0.05;
   private Hook<?, ?> hook =
-      new KdjHook();
-  // new MacdHook();
+//      new KdjHook();
+   new MacdHook();
   // new MdwHook();
 
   static {
@@ -56,9 +57,10 @@ public class Context {
     }
   }
 
-  Operator<Order, Order> OPERATER = USE_TIME ?
-      new TimeOperator(1000, 1000 * 60 * 60) :
+  Operator<Order, Order> DEFAULT_OPERATER = USE_TIME ?
+      new TimeOperator(20 * 1000, 1000 * 60 * 10) :
       new VolumeOperator(10);
+  PositionPolicy DEFAULT_POLICY = PositionPolicy.create(d -> 0.05, d -> 0.01);
   int THREAD_COUNT = USE_TIME ? 8 : 8;
   ParamSelectIndex PARAM_INDEX = ParamSelectIndex.RR;
 
@@ -72,8 +74,8 @@ public class Context {
   }
 
   public <T extends Trader<?>> void defaultColumns(DataWriter<Result<T>> cs) {
-    cs.addColumn("date", r->r.getOrder().getDate());
-    cs.addColumn("time stamp", r -> r.getOrder().getTime());
+    cs.addColumn("date", r -> r.getOrder().getDate());
+    cs.addColumn("time", r -> r.getOrder().getTime());
     cs.addColumn("average price", r -> r.getOrder().getAveragePrice());
     cs.addColumn("volume", r -> r.getOrder().getVolume());
     cs.addColumn("price", r -> r.getOrder().getCurrentPrice());

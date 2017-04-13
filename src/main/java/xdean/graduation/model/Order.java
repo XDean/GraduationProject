@@ -11,10 +11,12 @@ import lombok.Value;
 @Value
 public class Order {
 
-  private static final ThreadSafeDateFormat format = new ThreadSafeDateFormat(
+  private static final ThreadSafeDateFormat DATE_FORMAT = new ThreadSafeDateFormat(
       () -> new SimpleDateFormat("yyyyMMdd"));
+  private static final ThreadSafeDateFormat TIME_FORMAT = new ThreadSafeDateFormat(
+      () -> new SimpleDateFormat("HH:mm:ss"));
 
-  long time;
+  long timeStamp;
   String name;
   double lastClosePrice;
   double lastClearPrice;
@@ -24,19 +26,19 @@ public class Order {
   double sellPrice;
   double buyPrice;
   String date;
+  String time;
 
-  public Order(long time, String name, double lastClosePrice, double lastClearPrice, double currentPrice, double averagePrice, double volume,
-      double sellPrice,
-      double buyPrice,
-      String date) {
-    this(time, name, lastClosePrice, lastClearPrice, currentPrice, averagePrice, volume, sellPrice, buyPrice);
+  public Order(long timeStamp, String name, double lastClosePrice, double lastClearPrice, double currentPrice, double averagePrice, double volume,
+      double sellPrice,      double buyPrice,
+      String date, String time) {
+    this(timeStamp, name, lastClosePrice, lastClearPrice, currentPrice, averagePrice, volume, sellPrice, buyPrice);
   }
 
-  public Order(long time, String name, double lastClosePrice, double lastClearPrice, double currentPrice, double averagePrice, double volume,
+  public Order(long timeStamp, String name, double lastClosePrice, double lastClearPrice, double currentPrice, double averagePrice, double volume,
       double sellPrice,
       double buyPrice) {
     super();
-    this.time = time;
+    this.timeStamp = timeStamp;
     this.name = name;
     this.lastClosePrice = lastClosePrice;
     this.lastClearPrice = lastClearPrice;
@@ -45,7 +47,8 @@ public class Order {
     this.volume = volume;
     this.sellPrice = sellPrice;
     this.buyPrice = buyPrice;
-    this.date = format.format(new Date(time));
+    this.date = DATE_FORMAT.format(new Date(timeStamp));
+    this.time = TIME_FORMAT.format(new Date(timeStamp));
   }
 
   /**

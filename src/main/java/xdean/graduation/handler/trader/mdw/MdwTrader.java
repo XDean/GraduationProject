@@ -1,15 +1,12 @@
 package xdean.graduation.handler.trader.mdw;
 
-import lombok.Getter;
-import xdean.graduation.handler.trader.Trader;
+import xdean.graduation.handler.trader.AbstractTrader;
 import xdean.graduation.handler.trader.TraderUtil;
 import xdean.graduation.model.Order;
 import xdean.graduation.model.Repo;
 
-public class MdwTrader implements Trader<int[]> {
+public class MdwTrader extends AbstractTrader<int[]> {
 
-  @Getter
-  Repo repo;
   int open;// Open
   int close;// Close
   boolean first = true;

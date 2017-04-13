@@ -1,7 +1,5 @@
 package xdean.graduation.workspace.hook;
 
-import static xdean.jex.extra.rx.RxUtil.*;
-import rx.Observable;
 import xdean.graduation.handler.param.handler.ParamHandler;
 import xdean.graduation.handler.param.handler.adapter.IntArrayParamAdapter;
 import xdean.graduation.handler.param.handler.adapter.IntParamAdapter;
@@ -16,7 +14,7 @@ import xdean.jex.extra.Pair;
 public class MacdHook extends BaseHook<int[], MacdTrader> {
 
   @Override
-  public MacdTrader createTrader(Repo repo) {
+  public MacdTrader create(Repo repo) {
     return new MacdTrader(repo) {
       @Override
       public Trader<int[]> setParam(int[] p) {
@@ -27,15 +25,7 @@ public class MacdHook extends BaseHook<int[], MacdTrader> {
 
   @Override
   public int[] getParam() {
-    return Context.USE_TIME ? new int[] { 3600, 7200, 500 } : new int[] { 260, 520, 50 };
-  }
-
-  @Override
-  public Observable<int[]> getParams() {
-    return (Context.USE_TIME ?
-        cross(range(2000, 4000, 200), range(500, 1500, 100)) :
-        cross(range(200, 400, 20), range(50, 150, 10)))
-        .map(p -> new int[] { p.getLeft(), p.getLeft() * 2, p.getRight() });
+    return Context.USE_TIME ? new int[] { 498, 996, 170 } : new int[] { 260, 520, 50 };
   }
 
   @Override

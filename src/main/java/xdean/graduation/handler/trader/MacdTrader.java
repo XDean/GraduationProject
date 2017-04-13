@@ -1,8 +1,5 @@
 package xdean.graduation.handler.trader;
 
-import java.util.function.UnaryOperator;
-
-import lombok.Getter;
 import xdean.graduation.index.MACD;
 import xdean.graduation.model.Order;
 import xdean.graduation.model.Repo;
@@ -15,10 +12,8 @@ import xdean.jex.util.calc.MathUtil;
  * @author XDean
  *
  */
-public class MacdTrader implements Trader<int[]> {
+public class MacdTrader extends AbstractTrader<int[]> {
 
-  @Getter
-  Repo repo;
   MacdExtend macd;
 
   public MacdTrader(Repo repo) {
@@ -41,46 +36,23 @@ public class MacdTrader implements Trader<int[]> {
     return macd;
   }
 
-  private static class MacdExtend extends MACD {
+  private class MacdExtend extends MACD {
 
-    MACD old;
-    Double oldInput;
-
+    Double oldHistogram;
     double position = 0d;
-    UnaryOperator<Double> openRate = d -> d * d * 500;
-    UnaryOperator<Double> closeRate = d -> d * d * 200;
 
     public MacdExtend(int f, int s, int a) {
       super(f, s, a);
-      old = new MACD(f, s, a);
     }
 
     @Override
     public void accept(Double t) {
-      if (oldInput != null) {
-        old.accept(oldInput);
-      }
-      oldInput = t;
+      oldHistogram = getHistogram();
       super.accept(t);
     }
 
     double position() {
-      double histogram = getHistogram();
-      double delta = histogram - old.getHistogram();
-      if (histogram > 0) {
-        if (delta > 0) {
-          position += openRate.apply(delta);
-        } else {
-          position -= closeRate.apply(-delta);
-        }
-      }
-      if (histogram < 0) {
-        if (delta < 0) {
-          position -= openRate.apply(-delta);
-        } else {
-          position += closeRate.apply(delta);
-        }
-      }
+      position += TraderUtil.adjustByHistogram(oldHistogram, getHistogram(), policy);
       return position = MathUtil.toRange(position, -1d, 1d);
     }
   }

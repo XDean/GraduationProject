@@ -39,7 +39,7 @@ public class IF01SplitValueReader extends BaseReader<Path, Order> {
     double sellPrice = Double.valueOf(split[15]);
     double lastClosePrice = Double.valueOf(split[45]);
     return Order.builder()
-        .time(time)
+        .timeStamp(time)
         .lastClosePrice(lastClosePrice)
         .currentPrice(currentPrice)
         .averagePrice(averagePrice)

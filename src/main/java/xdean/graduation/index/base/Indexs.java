@@ -76,7 +76,7 @@ public class Indexs {
 
   public DoubleIndex annualizedStandardDeviation() {
     DoubleIndex sd = standardDeviation();
-    return new DoubleRecursiveIndex(d -> sd.get(d), (v, c, d) -> sd.get(d) * Math.sqrt(250 / (1 + c)));
+    return new DoubleRecursiveIndex(d -> sd.get(d), (v, c, d) -> sd.get(d) * Math.sqrt(250));
   }
 
   /**

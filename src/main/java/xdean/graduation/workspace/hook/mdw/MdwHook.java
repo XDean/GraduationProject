@@ -1,10 +1,9 @@
 package xdean.graduation.workspace.hook.mdw;
 
-import static xdean.jex.extra.rx.RxUtil.*;
-import rx.Observable;
 import xdean.graduation.handler.param.handler.ParamHandler;
 import xdean.graduation.handler.param.handler.adapter.IntArrayParamAdapter;
 import xdean.graduation.handler.param.handler.adapter.IntParamAdapter;
+import xdean.graduation.handler.trader.PositionPolicy;
 import xdean.graduation.handler.trader.mdw.MdwTrader;
 import xdean.graduation.index.base.Index;
 import xdean.graduation.io.writer.DataWriter;
@@ -17,19 +16,18 @@ import xdean.jex.extra.Pair;
 public class MdwHook extends BaseHook<int[], MdwTrader> {
 
   @Override
-  public MdwTrader createTrader(Repo repo) {
+  public MdwTrader create(Repo repo) {
     return new MdwTrader(repo);
+  }
+  
+  @Override
+  protected PositionPolicy getPositionPolicy() {
+    return PositionPolicy.ALL_OUT;
   }
 
   @Override
   public int[] getParam() {
     return new int[] { 0, 0 };
-  }
-
-  @Override
-  public Observable<int[]> getParams() {
-    return cross(range(0, 20, 1), range(0, 5, 1))
-        .map(p -> new int[] { p.getLeft(), p.getRight() });
   }
 
   @Override

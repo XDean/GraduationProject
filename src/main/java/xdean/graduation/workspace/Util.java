@@ -198,7 +198,7 @@ public class Util {
               }
             case JBH:
               if (fileName.endsWith(".bsv")) {
-                return new xdean.graduation.io.reader.JuBoHua.IF01SplitValueReader(" ");
+                return new xdean.graduation.io.reader.JuBoHua.SplitValueReader(" ");
               } else {
                 throw illegalArgumentException;
               }
@@ -217,7 +217,8 @@ public class Util {
   public Observable<String> lines(Path p) {
     // return Observable.from(CacheUtil.cache(Util.class, p, () ->
     // TaskUtil.uncheck(() -> Files.readAllLines(p))));
-    return Observable.from(TaskUtil.uncheck(() -> Files.readAllLines(p)));
+    // return Observable.from(TaskUtil.uncheck(() -> Files.readAllLines(p)));
+    return Observable.from(() -> TaskUtil.uncheck(()->Files.lines(p).iterator()));
   }
 
   public Path getOutputFile(Path file) throws IOException {

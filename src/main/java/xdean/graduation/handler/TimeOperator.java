@@ -45,17 +45,17 @@ public class TimeOperator implements Operator<Order, Order> {
         return;
       }
 
-      long gap = next.getTime() - old.getTime();
+      long gap = Math.abs(next.getTimeStamp() - old.getTimeStamp());
       // fit or ignore
       if (Math.abs(gap - baseGap) < baseGap * ERROR_RANGE || gap > ignoreGap) {
         actual.onNext(old);
         old = next;
       } else if (gap < baseGap) {// merge
-        old = Order.merge(old, next).toBuilder().time(old.getTime()).build();
+        old = Order.merge(old, next).toBuilder().timeStamp(old.getTimeStamp()).build();
       } else {// split(zero fill)
         actual.onNext(old);
-        old = Order.builder()
-            .time(old.getTime() + baseGap)
+        old = old.toBuilder()
+            .timeStamp(old.getTimeStamp() + baseGap)
             .volume(0)
             .currentPrice(old.getCurrentPrice())
             .averagePrice(old.getCurrentPrice())

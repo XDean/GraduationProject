@@ -34,13 +34,14 @@ public class WorkSpace {
   }
 
   void work() {
-    Path file = Paths.get("data", "IF17S1.jbh.bsv");
+    Path file = Paths.get("data", "rb1705.jbh.bsv");
     Repo repo = Repo.builder()
         .taxRate(0.0000115)
         .funds(1000 * 1000)
         .canSellShort(true)
         .perLot(1)
         .build();
+
     switch (getDataSource(file)) {
     case TR:
       if (SELECT_PARAM) {
@@ -58,7 +59,6 @@ public class WorkSpace {
       }
       break;
     }
-    ;
   }
 
   /*************
@@ -154,7 +154,7 @@ public class WorkSpace {
     return pair.right(
         Observable.from(pair.getRight())
             .skip(1)
-            .lift(Context.OPERATER));
+            .lift(Context.DEFAULT_OPERATER));
   }
 
   /*************

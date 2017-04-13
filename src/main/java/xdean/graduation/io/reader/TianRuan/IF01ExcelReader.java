@@ -42,7 +42,7 @@ public class IF01ExcelReader extends BaseReader<Path, Order> {
     double sellPrice = row.getCell(15).getNumericCellValue();
     double lastClosePrice = row.getCell(45).getNumericCellValue();
     return Order.builder()
-        .time(time)
+        .timeStamp(time)
         .lastClosePrice(lastClosePrice)
         .currentPrice(currentPrice)
         .averagePrice(averagePrice)
