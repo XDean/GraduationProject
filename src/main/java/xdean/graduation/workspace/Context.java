@@ -12,14 +12,14 @@ import rx.Observable.Operator;
 import rx.Scheduler;
 import xdean.graduation.handler.TimeOperator;
 import xdean.graduation.handler.VolumeOperator;
-import xdean.graduation.handler.trader.PositionPolicy;
-import xdean.graduation.handler.trader.Trader;
+import xdean.graduation.handler.trader.common.PositionPolicy;
+import xdean.graduation.handler.trader.common.Trader;
 import xdean.graduation.io.writer.CsvSaver;
 import xdean.graduation.io.writer.DataWriter;
 import xdean.graduation.model.Order;
 import xdean.graduation.model.Result;
 import xdean.graduation.workspace.hook.Hook;
-import xdean.graduation.workspace.hook.MacdHook;
+import xdean.graduation.workspace.hook.KdjHook;
 import xdean.graduation.workspace.optional.ParamSelectIndex;
 import xdean.jex.extra.rx.RxUtil;
 import xdean.jex.util.cache.CacheUtil;
@@ -38,8 +38,9 @@ public class Context {
   boolean TRADE_WITH_CURRENT_PRICE = false;
   double RISK_FREE = 0.05;
   private Hook<?, ?> hook =
-//      new KdjHook();
-   new MacdHook();
+//      new KdjMacdHook();
+      new KdjHook();
+//   new MacdHook();
   // new MdwHook();
 
   static {

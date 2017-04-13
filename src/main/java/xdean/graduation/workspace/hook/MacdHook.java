@@ -4,7 +4,7 @@ import xdean.graduation.handler.param.handler.ParamHandler;
 import xdean.graduation.handler.param.handler.adapter.IntArrayParamAdapter;
 import xdean.graduation.handler.param.handler.adapter.IntParamAdapter;
 import xdean.graduation.handler.trader.MacdTrader;
-import xdean.graduation.handler.trader.Trader;
+import xdean.graduation.handler.trader.common.Trader;
 import xdean.graduation.io.writer.DataWriter;
 import xdean.graduation.model.Repo;
 import xdean.graduation.model.Result;
@@ -38,11 +38,11 @@ public class MacdHook extends BaseHook<int[], MacdTrader> {
 
   @Override
   public void extraColumns(DataWriter<Result<MacdTrader>> writer) {
-    writer.addColumn("fast", r -> r.getTrader().getMacd().getFast());
-    writer.addColumn("slow", r -> r.getTrader().getMacd().getSlow());
-    writer.addColumn("dif", r -> r.getTrader().getMacd().getDif());
-    writer.addColumn("macd", r -> r.getTrader().getMacd().getMacd());
-    writer.addColumn("histogram", r -> r.getTrader().getMacd().getHistogram());
+    writer.addColumn("fast", r -> r.getTrader().getFast());
+    writer.addColumn("slow", r -> r.getTrader().getSlow());
+    writer.addColumn("dif", r -> r.getTrader().getDif());
+    writer.addColumn("macd", r -> r.getTrader().getMacd());
+    writer.addColumn("histogram", r -> r.getTrader().getHistogram());
   }
 
   @Override

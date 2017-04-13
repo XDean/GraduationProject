@@ -36,6 +36,10 @@ public class Indexs {
     return new DoubleRecursiveIndex(1d, (v, d) -> v * d);
   }
 
+  public DoubleIndex average() {
+    return mean();
+  }
+
   public DoubleIndex mean() {
     return new DoubleRecursiveIndex(0d, (v, c, d) -> (v * c + d) / (c + 1));
   }
@@ -63,7 +67,7 @@ public class Indexs {
 
       @Override
       public Double get() {
-        return Math.pow(rate, 250 / count) - 1;
+        return Math.pow(rate, 250d / count) - 1;
       }
 
       @Override

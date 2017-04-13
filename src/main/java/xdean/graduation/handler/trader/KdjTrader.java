@@ -1,9 +1,11 @@
 package xdean.graduation.handler.trader;
 
+import xdean.graduation.handler.trader.common.AbstractTrader;
+import xdean.graduation.handler.trader.common.TraderUtil;
 import xdean.graduation.index.KDJ.KDJ;
+import xdean.graduation.index.base.DoubleIndex;
 import xdean.graduation.model.Order;
 import xdean.graduation.model.Repo;
-import xdean.jex.util.calc.MathUtil;
 
 /**
  * PARAM: {n, lm}
@@ -13,48 +15,40 @@ import xdean.jex.util.calc.MathUtil;
  */
 public class KdjTrader extends AbstractTrader<int[]> {
 
-  private static final int DEFAULT_S = 3;
-
-  KdjExtend kdj;
+  KDJ kdj;
+  DoubleIndex actual;
 
   public KdjTrader(Repo repo) {
-    this.repo = repo;
+    super(repo);
   }
 
   @Override
   public KdjTrader setParam(int[] p) {
-    this.kdj = new KdjExtend(p[0], p[1], p[1], DEFAULT_S);
+    this.kdj = new KDJ(p[0], p[1], p[1], KDJ.DEFAULT_S);
+    this.actual = TraderUtil.histogramToPosition(
+        DoubleIndex.create(d -> kdj.accept(d), () -> kdj.getK() - kdj.getD()),
+        () -> policy);
     return this;
   }
 
   @Override
   public void trade(Order order) {
-    kdj.accept(order.getAveragePrice());
-    TraderUtil.tradeByPosition(repo, order, kdj.position());
+    TraderUtil.tradeByPosition(repo, order, actual.get(order.getAveragePrice()));
   }
 
-  public KDJ getKdj() {
-    return kdj;
+  public double getRsv() {
+    return kdj.getRsv().get();
   }
 
-  private class KdjExtend extends KDJ {
+  public double getK() {
+    return kdj.getK();
+  }
 
-    double oldHistogram;
-    double position = 0d;
+  public double getD() {
+    return kdj.getD();
+  }
 
-    public KdjExtend(int n, int m, int l, int s) {
-      super(n, m, l, s);
-    }
-
-    @Override
-    public void accept(Double d) {
-      oldHistogram = getK() - getD();
-      super.accept(d);
-    }
-
-    double position() {
-      position += TraderUtil.adjustByHistogram(oldHistogram, getK() - getD(), policy);
-      return position = MathUtil.toRange(position, -1d, 1d);
-    }
+  public double getJ() {
+    return kdj.getJ();
   }
 }

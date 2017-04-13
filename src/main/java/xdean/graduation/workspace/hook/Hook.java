@@ -2,7 +2,7 @@ package xdean.graduation.workspace.hook;
 
 import xdean.graduation.handler.param.handler.ParamHandler;
 import xdean.graduation.handler.param.selector.ParamSelector;
-import xdean.graduation.handler.trader.Trader;
+import xdean.graduation.handler.trader.common.Trader;
 import xdean.graduation.index.base.Index;
 import xdean.graduation.io.writer.DataWriter;
 import xdean.graduation.model.Repo;

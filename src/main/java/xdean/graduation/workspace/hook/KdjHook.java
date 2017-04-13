@@ -39,10 +39,10 @@ public class KdjHook extends BaseHook<int[], KdjTrader> {
 
   @Override
   public void extraColumns(DataWriter<Result<KdjTrader>> sc) {
-    sc.addColumn("rsv", r -> r.getTrader().getKdj().getRsv().get());
-    sc.addColumn("K", r -> r.getTrader().getKdj().getK());
-    sc.addColumn("D", r -> r.getTrader().getKdj().getD());
-    sc.addColumn("J", r -> r.getTrader().getKdj().getJ());
+    sc.addColumn("rsv", r -> r.getTrader().getRsv());
+    sc.addColumn("K", r -> r.getTrader().getK());
+    sc.addColumn("D", r -> r.getTrader().getD());
+    sc.addColumn("J", r -> r.getTrader().getJ());
   }
 
   @Override

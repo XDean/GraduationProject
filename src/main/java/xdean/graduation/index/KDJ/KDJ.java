@@ -10,6 +10,8 @@ import xdean.graduation.index.base.Indexs;
 
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class KDJ implements DoubleIndex {
+
+  public static final int DEFAULT_S = 3;
   
   RSV rsv;
   Index<Double, Double> K, D;

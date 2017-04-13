@@ -1,14 +1,47 @@
-package xdean.graduation.handler.trader;
+package xdean.graduation.handler.trader.common;
 
 import lombok.experimental.UtilityClass;
+import xdean.graduation.index.base.DoubleIndex;
 import xdean.graduation.model.Order;
 import xdean.graduation.model.Repo;
 import xdean.graduation.workspace.Context;
+import xdean.jex.util.calc.MathUtil;
+
+import com.google.common.base.Supplier;
 
 @UtilityClass
 public class TraderUtil {
 
-  public double adjustByHistogram(double oldHistogram, double histogram, PositionPolicy policy) {
+  /**
+   * 
+   * @param index Index output histogram
+   * @return index output now position
+   */
+  public DoubleIndex histogramToPosition(DoubleIndex index, Supplier<PositionPolicy> policy) {
+    return new DoubleIndex() {
+      double position = 0;
+      Double oldHistogram;
+
+      @Override
+      public Double get() {
+        return position;
+      }
+
+      @Override
+      public void accept(Double t) {
+        oldHistogram = index.get();
+        index.accept(t);
+        adjustPosition();
+      }
+
+      void adjustPosition() {
+        position += adjustByHistogram(oldHistogram, index.get(), policy.get());
+        position = MathUtil.toRange(position, -1d, 1d);
+      }
+    };
+  }
+
+  double adjustByHistogram(double oldHistogram, double histogram, PositionPolicy policy) {
     double delta = histogram - oldHistogram;
     if (histogram > 0) {
       if (delta > 0) {

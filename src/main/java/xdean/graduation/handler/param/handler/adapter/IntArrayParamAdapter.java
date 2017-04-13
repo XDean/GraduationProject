@@ -33,7 +33,7 @@ public class IntArrayParamAdapter implements ParamAdapter<int[], int[]> {
     if (breaked == false) {
       return Pair.of(Observable.just(paramResult), precision);
     }
-    return merge(Observable.<Pair<Observable<Integer>, Integer>> unsafeCreate(s -> {
+    return merge(Observable.unsafeCreate(s -> {
       for (int i = 0; i < intParamAdapters.length; i++) {
         s.onNext(intParamAdapters[i].getParams(paramResult[i], precision[i]));
       }

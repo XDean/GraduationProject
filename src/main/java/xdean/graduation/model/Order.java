@@ -3,9 +3,9 @@ package xdean.graduation.model;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import xdean.jex.extra.ThreadSafeDateFormat;
 import lombok.Builder;
 import lombok.Value;
+import xdean.jex.extra.ThreadSafeDateFormat;
 
 @Builder(toBuilder = true)
 @Value

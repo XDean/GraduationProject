@@ -16,7 +16,7 @@ import lombok.experimental.UtilityClass;
 import rx.Observable;
 import rx.Single;
 import xdean.graduation.handler.IndexOperator;
-import xdean.graduation.handler.trader.Trader;
+import xdean.graduation.handler.trader.common.Trader;
 import xdean.graduation.model.Order;
 import xdean.graduation.model.Repo;
 import xdean.graduation.model.Result;
@@ -146,7 +146,7 @@ public class WorkSpace {
                 .last()
         )
         .lift(IndexOperator.create(() -> getHook().getResultIndex(false)))
-        // .doOnNext(r -> System.out.println(getHook().formatParamResult(Pair.of(param, r))))
+//         .doOnNext(r -> System.out.println(getHook().formatParamResult(Pair.of(param, r))))
         .toSingle();
   }
 

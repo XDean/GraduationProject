@@ -1,7 +1,7 @@
 package xdean.graduation.handler.trader.mdw;
 
-import xdean.graduation.handler.trader.AbstractTrader;
-import xdean.graduation.handler.trader.TraderUtil;
+import xdean.graduation.handler.trader.common.AbstractTrader;
+import xdean.graduation.handler.trader.common.TraderUtil;
 import xdean.graduation.model.Order;
 import xdean.graduation.model.Repo;
 
@@ -13,7 +13,7 @@ public class MdwTrader extends AbstractTrader<int[]> {
   double openPrice;
 
   public MdwTrader(Repo repo) {
-    this.repo = repo;
+    super(repo);
   }
 
   @Override

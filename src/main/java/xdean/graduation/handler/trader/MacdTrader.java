@@ -1,9 +1,12 @@
 package xdean.graduation.handler.trader;
 
+import xdean.graduation.handler.trader.common.AbstractTrader;
+import xdean.graduation.handler.trader.common.Trader;
+import xdean.graduation.handler.trader.common.TraderUtil;
 import xdean.graduation.index.MACD;
+import xdean.graduation.index.base.DoubleIndex;
 import xdean.graduation.model.Order;
 import xdean.graduation.model.Repo;
-import xdean.jex.util.calc.MathUtil;
 
 /**
  * 
@@ -14,46 +17,43 @@ import xdean.jex.util.calc.MathUtil;
  */
 public class MacdTrader extends AbstractTrader<int[]> {
 
-  MacdExtend macd;
+  MACD macd;
+  DoubleIndex actual;
 
   public MacdTrader(Repo repo) {
-    this.repo = repo;
+    super(repo);
   }
 
   @Override
   public Trader<int[]> setParam(int[] p) {
-    macd = new MacdExtend(p[0], p[1], p[2]);
+    macd = new MACD(p[0], p[1], p[2]);
+    actual = TraderUtil.histogramToPosition(
+        DoubleIndex.create(d -> macd.accept(d), () -> macd.getHistogram()), () -> policy);
     return this;
   }
 
   @Override
   public void trade(Order order) {
-    macd.accept(order.getAveragePrice());
-    TraderUtil.tradeByPosition(repo, order, macd.position());
+    TraderUtil.tradeByPosition(repo, order, actual.get(order.getAveragePrice()));
   }
 
-  public MACD getMacd() {
-    return macd;
+  public double getFast() {
+    return macd.getFast();
   }
 
-  private class MacdExtend extends MACD {
+  public double getSlow() {
+    return macd.getSlow();
+  }
 
-    Double oldHistogram;
-    double position = 0d;
+  public double getDif() {
+    return macd.getDif();
+  }
 
-    public MacdExtend(int f, int s, int a) {
-      super(f, s, a);
-    }
+  public double getMacd() {
+    return macd.getMacd();
+  }
 
-    @Override
-    public void accept(Double t) {
-      oldHistogram = getHistogram();
-      super.accept(t);
-    }
-
-    double position() {
-      position += TraderUtil.adjustByHistogram(oldHistogram, getHistogram(), policy);
-      return position = MathUtil.toRange(position, -1d, 1d);
-    }
+  public double getHistogram() {
+    return macd.getHistogram();
   }
 }

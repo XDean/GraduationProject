@@ -1,10 +1,10 @@
 package xdean.graduation.model;
 
-import xdean.jex.util.calc.MathUtil;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
+import xdean.jex.util.calc.MathUtil;
 
 /**
  * Single target repository with trade tax and can sell short 100%.
@@ -32,6 +32,7 @@ public class Repo {
   private double cost;
   private double funds;
   private double totalTax;
+  private double totalTurnover;
 
   public Repo price(double price) {
     this.price = price;
@@ -40,21 +41,27 @@ public class Repo {
 
   public int buy(int lot) {
     lot = MathUtil.toRange(lot, 0, (int) (funds / price / perLot / (1 + taxRate)));
-    totalTax += price * lot * perLot * taxRate;
-    double totalPrice = price * lot * perLot * (1 + taxRate);
+    double preTax = price * lot * perLot;
+    double tax = preTax * taxRate;
+    double afterTax = preTax + tax;
+    totalTax += tax;
+    totalTurnover += afterTax;
     hold += lot;
-    cost += totalPrice;
-    funds -= totalPrice;
+    cost += afterTax;
+    funds -= afterTax;
     return lot;
   }
 
   public int sell(int lot) {
     lot = MathUtil.toRange(lot, 0, (canSellShort ? getMaxHold() : 0) + hold);
-    totalTax += price * lot * perLot * taxRate;
-    double totalPrice = price * lot * perLot * (1 - taxRate);
+    double preTax = price * lot * perLot;
+    double tax = preTax * taxRate;
+    double afterTax = preTax - tax;
+    totalTax += tax;
+    totalTurnover += afterTax;
     hold -= lot;
-    cost -= totalPrice;
-    funds += totalPrice;
+    cost -= afterTax;
+    funds += afterTax;
     return lot;
   }
 
@@ -65,8 +72,7 @@ public class Repo {
   /**
    * Adjust position to assigned rate
    * 
-   * @param position
-   *          negative means short if can sell short
+   * @param position negative means short if can sell short
    * @return actual volume(lot), negative means sell
    */
   public int open(double position) {
@@ -93,6 +99,10 @@ public class Repo {
 
   public double getPayTaxRate() {
     return totalTax / getInitialAsset();
+  }
+
+  public double getTurnOverRate() {
+    return totalTurnover / getInitialAsset();
   }
 
   public double getCurrentAsset() {

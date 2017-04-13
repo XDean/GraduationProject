@@ -1,4 +1,4 @@
-package xdean.graduation.handler.trader;
+package xdean.graduation.handler.trader.common;
 
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -10,6 +10,10 @@ public abstract class AbstractTrader<P> implements Trader<P> {
   @Getter
   Repo repo;
   PositionPolicy policy = PositionPolicy.ALL_OUT;
+  
+  public AbstractTrader(Repo repo) {
+   this.repo = repo;
+  }
 
   @Override
   public Trader<P> setPositionPolicy(PositionPolicy policy) {

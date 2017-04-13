@@ -18,7 +18,7 @@ import rx.Observable;
 import rx.Single;
 import xdean.graduation.handler.param.handler.ParamHandler;
 import xdean.graduation.handler.param.selector.ParamSelector;
-import xdean.graduation.handler.trader.Trader;
+import xdean.graduation.handler.trader.common.Trader;
 import xdean.graduation.index.MaxDrawdown;
 import xdean.graduation.index.RepoAnalyser;
 import xdean.graduation.index.base.DoubleIndex;
@@ -133,6 +133,7 @@ public class Util {
     Index<Void, Integer> count = Indexs.count();
     DoubleIndex accumulRR = Indexs.product();
     DoubleIndex accumulTax = Indexs.sum();
+    DoubleIndex avgTurnover = Indexs.average();
     DoubleIndex annualRR = Indexs.annualizedReturn();
     DoubleIndex annualSR = Indexs.annualizedSharpRatio(RISK_FREE, false);
     DoubleIndex annualSD = Indexs.annualizedStandardDeviation();
@@ -156,6 +157,7 @@ public class Util {
         .doOnNext(r -> annualRR.accept(r.getRepo().getReturnRate()))
         .doOnNext(r -> annualSR.accept(r.getRepo().getReturnRate()))
         .doOnNext(r -> annualSD.accept(r.getRepo().getReturnRate()))
+        .doOnNext(r -> avgTurnover.accept(r.getRepo().getTurnOverRate()))
         .doOnNext(dailySaver::row)
         .doOnCompleted(dailySaver::end)
         .doOnCompleted(() -> System.out.println("Summary:"))
@@ -166,6 +168,7 @@ public class Util {
         .doOnCompleted(() -> System.out.printf("Annual return rate: %.2f%%\n", 100 * annualRR.get()))
         .doOnCompleted(() -> System.out.printf("Annualized standard deviation : %.2f%%\n", 100 * annualSD.get()))
         .doOnCompleted(() -> System.out.printf("Annual sharp ratio: %.2f\n", annualSR.get()))
+        .doOnCompleted(() -> System.out.printf("Average daily turnover: %.2f%%\n", 100 * avgTurnover.get()))
         .doOnCompleted(() -> System.out.printf("Accumulated pay tax: %.2f%%\n", 100 * accumulTax.get()))
         .doOnCompleted(() -> System.out.println(ra))
         .doOnCompleted(() -> splitLine());
@@ -218,7 +221,7 @@ public class Util {
     // return Observable.from(CacheUtil.cache(Util.class, p, () ->
     // TaskUtil.uncheck(() -> Files.readAllLines(p))));
     // return Observable.from(TaskUtil.uncheck(() -> Files.readAllLines(p)));
-    return Observable.from(() -> TaskUtil.uncheck(()->Files.lines(p).iterator()));
+    return Observable.from(() -> TaskUtil.uncheck(() -> Files.lines(p).iterator()));
   }
 
   public Path getOutputFile(Path file) throws IOException {
