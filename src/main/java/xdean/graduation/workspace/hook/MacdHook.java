@@ -3,6 +3,9 @@ package xdean.graduation.workspace.hook;
 import xdean.graduation.handler.param.handler.ParamHandler;
 import xdean.graduation.handler.param.handler.adapter.IntArrayParamAdapter;
 import xdean.graduation.handler.param.handler.adapter.IntParamAdapter;
+import xdean.graduation.handler.param.selector.ConvolutionSelector;
+import xdean.graduation.handler.param.selector.ParamSelector;
+import xdean.graduation.handler.param.selector.ConvolutionSelector.WeightPolicy;
 import xdean.graduation.handler.trader.MacdTrader;
 import xdean.graduation.handler.trader.common.Trader;
 import xdean.graduation.io.writer.DataWriter;
@@ -31,9 +34,14 @@ public class MacdHook extends BaseHook<int[], MacdTrader> {
   @Override
   public ParamHandler<int[]> getParamHandler() {
     return new IntArrayParamAdapter(
-        new IntParamAdapter(10, 500, 50, 5),
+        new IntParamAdapter(10, 1000, 50, 5),
         new IntParamAdapter(200, 200, 50, 5),
         new IntParamAdapter(10, 500, 50, 5));
+  }
+  
+  @Override
+  public ParamSelector<int[], Double> getParamSelector() {
+    return new ConvolutionSelector(WeightPolicy.CENTER, 1, sqrDis -> sqrDis == 0 ? 0 : 1d / 8);
   }
 
   @Override

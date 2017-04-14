@@ -29,7 +29,7 @@ public class Order {
   String time;
 
   public Order(long timeStamp, String name, double lastClosePrice, double lastClearPrice, double currentPrice, double averagePrice, double volume,
-      double sellPrice,      double buyPrice,
+      double sellPrice, double buyPrice,
       String date, String time) {
     this(timeStamp, name, lastClosePrice, lastClearPrice, currentPrice, averagePrice, volume, sellPrice, buyPrice);
   }
@@ -56,6 +56,10 @@ public class Order {
    */
   public String getDate() {
     return date;
+  }
+
+  public double getReturnRate() {
+    return currentPrice / lastClosePrice - 1;
   }
 
   public static Order merge(Order a, Order b) {

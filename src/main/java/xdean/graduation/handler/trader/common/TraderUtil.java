@@ -44,13 +44,13 @@ public class TraderUtil {
   double adjustByHistogram(double oldHistogram, double histogram, PositionPolicy policy) {
     double delta = histogram - oldHistogram;
     if (histogram > 0) {
-      if (delta > 0) {
+      if (delta >= 0) {
         return policy.open(delta);
       } else {
         return -policy.close(-delta);
       }
     } else if (histogram < 0) {
-      if (delta < 0) {
+      if (delta <= 0) {
         return -policy.open(-delta);
       } else {
         return policy.close(delta);

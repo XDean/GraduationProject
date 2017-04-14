@@ -132,6 +132,7 @@ public class Util {
 
     Index<Void, Integer> count = Indexs.count();
     DoubleIndex accumulRR = Indexs.product();
+    DoubleIndex accumulBasicRR = Indexs.product();
     DoubleIndex accumulTax = Indexs.sum();
     DoubleIndex avgTurnover = Indexs.average();
     DoubleIndex annualRR = Indexs.annualizedReturn();
@@ -143,6 +144,7 @@ public class Util {
     CsvSaver<Result<Trader<T>>> dailySaver = new CsvSaver<>(Files.newOutputStream(getDailyOutputFile(file)));
     dailySaver.addColumn("date", r -> r.getOrder().getDate());
     dailySaver.addColumn("price", r -> r.getOrder().getCurrentPrice());
+    dailySaver.addColumn("basic rr", r -> r.getOrder().getReturnRate());
     dailySaver.addColumn("rr", r -> r.getRepo().getReturnRate());
     dailySaver.addColumn("accumulRR", r -> accumulRR.get() - 1);
     dailySaver.addColumn("accumulTax", accumulTax);
@@ -153,6 +155,7 @@ public class Util {
         .doOnNext(r -> ra.merge(r.getAnalysis()))
         .doOnNext(r -> md.accept(r.getRepo().getReturnRate()))
         .doOnNext(r -> accumulRR.accept(1 + r.getRepo().getReturnRate()))
+        .doOnNext(r -> accumulBasicRR.accept(1 + r.getOrder().getReturnRate()))
         .doOnNext(r -> accumulTax.accept(r.getRepo().getPayTaxRate()))
         .doOnNext(r -> annualRR.accept(r.getRepo().getReturnRate()))
         .doOnNext(r -> annualSR.accept(r.getRepo().getReturnRate()))
@@ -163,6 +166,7 @@ public class Util {
         .doOnCompleted(() -> System.out.println("Summary:"))
         .doOnCompleted(() -> System.out.printf("Total %d trading days.\n", count.get()))
         .doOnCompleted(() -> System.out.printf("Accumulated return rate: %.2f%%\n", 100 * (accumulRR.get() - 1)))
+        .doOnCompleted(() -> System.out.printf("Accumulated basic return rate: %.2f%%\n", 100 * (accumulBasicRR.get() - 1)))
         .doOnCompleted(() -> System.out.printf("Max drawdown: %.2f%%\n", 100 * md.get()))
         .doOnCompleted(() -> System.out.printf("Return rate / Max drawdown: %.2f\n", (accumulRR.get() - 1) / md.get()))
         .doOnCompleted(() -> System.out.printf("Annual return rate: %.2f%%\n", 100 * annualRR.get()))
@@ -182,7 +186,7 @@ public class Util {
 
   DataReader<Path, Order> getReader() {
     return CacheUtil.<DataReader<Path, Order>> cache(
-        WorkSpace.class,
+        Util.class,
         "dataReader",
         () -> new DataReader<Path, Order>() {
           public DataReader<Path, Order> choose(Path data) {

@@ -27,8 +27,7 @@ public class MacdTrader extends AbstractTrader<int[]> {
   @Override
   public Trader<int[]> setParam(int[] p) {
     macd = new MACD(p[0], p[1], p[2]);
-    actual = TraderUtil.histogramToPosition(
-        DoubleIndex.create(d -> macd.accept(d), () -> macd.getHistogram()), () -> policy);
+    actual = TraderUtil.histogramToPosition(macd, () -> policy);
     return this;
   }
 
