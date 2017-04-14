@@ -129,10 +129,8 @@ public class Util {
 
   @SneakyThrows(IOException.class)
   <T> Observable<Result<Trader<T>>> saveDailyData(Observable<Result<Trader<T>>> ob, Path file) {
-
     Index<Void, Integer> count = Indexs.count();
     DoubleIndex accumulRR = Indexs.product();
-    DoubleIndex accumulBasicRR = Indexs.product();
     DoubleIndex accumulTax = Indexs.sum();
     DoubleIndex avgTurnover = Indexs.average();
     DoubleIndex annualRR = Indexs.annualizedReturn();
@@ -140,6 +138,11 @@ public class Util {
     DoubleIndex annualSD = Indexs.annualizedStandardDeviation();
     MaxDrawdown md = Indexs.maxDrawdown(false);
     RepoAnalyser ra = new RepoAnalyser();
+    DoubleIndex baseAccumulRR = Indexs.product();
+    DoubleIndex baseAnnualRR = Indexs.annualizedReturn();
+    DoubleIndex baseAnnualSR = Indexs.annualizedSharpRatio(RISK_FREE, false);
+    DoubleIndex baseAnnualSD = Indexs.annualizedStandardDeviation();
+    MaxDrawdown baseMd = Indexs.maxDrawdown(false);
 
     CsvSaver<Result<Trader<T>>> dailySaver = new CsvSaver<>(Files.newOutputStream(getDailyOutputFile(file)));
     dailySaver.addColumn("date", r -> r.getOrder().getDate());
@@ -155,27 +158,40 @@ public class Util {
         .doOnNext(r -> ra.merge(r.getAnalysis()))
         .doOnNext(r -> md.accept(r.getRepo().getReturnRate()))
         .doOnNext(r -> accumulRR.accept(1 + r.getRepo().getReturnRate()))
-        .doOnNext(r -> accumulBasicRR.accept(1 + r.getOrder().getReturnRate()))
         .doOnNext(r -> accumulTax.accept(r.getRepo().getPayTaxRate()))
         .doOnNext(r -> annualRR.accept(r.getRepo().getReturnRate()))
         .doOnNext(r -> annualSR.accept(r.getRepo().getReturnRate()))
         .doOnNext(r -> annualSD.accept(r.getRepo().getReturnRate()))
+        .doOnNext(r -> baseMd.accept(r.getOrder().getReturnRate()))
+        .doOnNext(r -> baseAccumulRR.accept(1 + r.getOrder().getReturnRate()))
+        .doOnNext(r -> baseAnnualRR.accept(r.getOrder().getReturnRate()))
+        .doOnNext(r -> baseAnnualSR.accept(r.getOrder().getReturnRate()))
+        .doOnNext(r -> baseAnnualSD.accept(r.getOrder().getReturnRate()))
         .doOnNext(r -> avgTurnover.accept(r.getRepo().getTurnOverRate()))
         .doOnNext(dailySaver::row)
         .doOnCompleted(dailySaver::end)
         .doOnCompleted(() -> System.out.println("Summary:"))
         .doOnCompleted(() -> System.out.printf("Total %d trading days.\n", count.get()))
-        .doOnCompleted(() -> System.out.printf("Accumulated return rate: %.2f%%\n", 100 * (accumulRR.get() - 1)))
-        .doOnCompleted(() -> System.out.printf("Accumulated basic return rate: %.2f%%\n", 100 * (accumulBasicRR.get() - 1)))
-        .doOnCompleted(() -> System.out.printf("Max drawdown: %.2f%%\n", 100 * md.get()))
-        .doOnCompleted(() -> System.out.printf("Return rate / Max drawdown: %.2f\n", (accumulRR.get() - 1) / md.get()))
-        .doOnCompleted(() -> System.out.printf("Annual return rate: %.2f%%\n", 100 * annualRR.get()))
-        .doOnCompleted(() -> System.out.printf("Annualized standard deviation : %.2f%%\n", 100 * annualSD.get()))
-        .doOnCompleted(() -> System.out.printf("Annual sharp ratio: %.2f\n", annualSR.get()))
+        .doOnCompleted(() -> System.out.printf("%33s%9s%9s\n", "", "policy", "base"))
+        .doOnCompleted(() -> printPercent("Accumulated return rate", accumulRR.get() - 1, baseAccumulRR.get() - 1))
+        .doOnCompleted(() -> printPercent("Max drawdown", md.get(), baseMd.get()))
+        .doOnCompleted(() -> printNumber("Return rate / Max drawdown",
+            (accumulRR.get() - 1) / md.get(), (baseAccumulRR.get() - 1) / baseMd.get()))
+        .doOnCompleted(() -> printPercent("Annual return rate", annualRR.get(), baseAnnualRR.get()))
+        .doOnCompleted(() -> printPercent("Annualized standard deviation", annualSD.get(), baseAnnualSD.get()))
+        .doOnCompleted(() -> printNumber("Annual sharp ratio", annualSR.get(), baseAnnualSR.get()))
         .doOnCompleted(() -> System.out.printf("Average daily turnover: %.2f%%\n", 100 * avgTurnover.get()))
         .doOnCompleted(() -> System.out.printf("Accumulated pay tax: %.2f%%\n", 100 * accumulTax.get()))
         .doOnCompleted(() -> System.out.println(ra))
         .doOnCompleted(() -> splitLine());
+  }
+
+  private void printNumber(String name, double my, double base) {
+    System.out.printf("%-30s : %8.2f*%8.2f*\n", name, my, base);
+  }
+
+  private void printPercent(String name, double my, double base) {
+    System.out.printf("%-30s : %8.2f%%%8.2f%%\n", name, my * 100, base * 100);
   }
 
   Context.DataSource getDataSource(Path p) {
