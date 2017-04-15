@@ -37,11 +37,11 @@ public class Context {
   boolean SELECT_PARAM;
   boolean TRADE_WITH_CURRENT_PRICE = false;
   double RISK_FREE = 0.05;
+//  boolean CLOSE_OVER_NIGHT = false;
   private Hook<?, ?> hook =
-//      new KdjMacdHook();
-      new KdjHook();
-//   new MacdHook();
-  // new MdwHook();
+       new KdjHook();
+//      new MacdHook();
+//   new MdwHook();
 
   static {
     Object command = System.getProperties().get("sun.java.command");
@@ -59,7 +59,7 @@ public class Context {
   }
 
   Operator<Order, Order> DEFAULT_OPERATER = USE_TIME ?
-      new TimeOperator(20 * 1000, 1000 * 60 * 10) :
+      new TimeOperator(20 * 1000, 1000 * 30) :
       new VolumeOperator(10);
   PositionPolicy DEFAULT_POLICY = PositionPolicy.create(d -> 0.05, d -> 0.01);
   int THREAD_COUNT = USE_TIME ? 8 : 8;

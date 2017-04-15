@@ -147,7 +147,7 @@ public class Util {
     CsvSaver<Result<Trader<T>>> dailySaver = new CsvSaver<>(Files.newOutputStream(getDailyOutputFile(file)));
     dailySaver.addColumn("date", r -> r.getOrder().getDate());
     dailySaver.addColumn("price", r -> r.getOrder().getCurrentPrice());
-    dailySaver.addColumn("basic rr", r -> r.getOrder().getReturnRate());
+    dailySaver.addColumn("base rr", r -> r.getOrder().getReturnRate());
     dailySaver.addColumn("rr", r -> r.getRepo().getReturnRate());
     dailySaver.addColumn("accumulRR", r -> accumulRR.get() - 1);
     dailySaver.addColumn("accumulTax", accumulTax);
@@ -178,7 +178,7 @@ public class Util {
         .doOnCompleted(() -> printNumber("Return rate / Max drawdown",
             (accumulRR.get() - 1) / md.get(), (baseAccumulRR.get() - 1) / baseMd.get()))
         .doOnCompleted(() -> printPercent("Annual return rate", annualRR.get(), baseAnnualRR.get()))
-        .doOnCompleted(() -> printPercent("Annualized standard deviation", annualSD.get(), baseAnnualSD.get()))
+        .doOnCompleted(() -> printPercent("Annual standard deviation", annualSD.get(), baseAnnualSD.get()))
         .doOnCompleted(() -> printNumber("Annual sharp ratio", annualSR.get(), baseAnnualSR.get()))
         .doOnCompleted(() -> System.out.printf("Average daily turnover: %.2f%%\n", 100 * avgTurnover.get()))
         .doOnCompleted(() -> System.out.printf("Accumulated pay tax: %.2f%%\n", 100 * accumulTax.get()))

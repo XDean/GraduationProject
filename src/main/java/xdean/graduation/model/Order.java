@@ -27,13 +27,15 @@ public class Order {
   double buyPrice;
   String date;
   String time;
+  boolean night;
 
   public Order(long timeStamp, String name, double lastClosePrice, double lastClearPrice, double currentPrice, double averagePrice, double volume,
       double sellPrice, double buyPrice,
-      String date, String time) {
+      String date, String time, boolean night) {
     this(timeStamp, name, lastClosePrice, lastClearPrice, currentPrice, averagePrice, volume, sellPrice, buyPrice);
   }
 
+  @SuppressWarnings("deprecation")
   public Order(long timeStamp, String name, double lastClosePrice, double lastClearPrice, double currentPrice, double averagePrice, double volume,
       double sellPrice,
       double buyPrice) {
@@ -47,8 +49,10 @@ public class Order {
     this.volume = volume;
     this.sellPrice = sellPrice;
     this.buyPrice = buyPrice;
-    this.date = DATE_FORMAT.format(new Date(timeStamp));
-    this.time = TIME_FORMAT.format(new Date(timeStamp));
+    Date d = new Date(timeStamp);
+    this.date = DATE_FORMAT.format(d);
+    this.time = TIME_FORMAT.format(d);
+    this.night = d.getHours() > 17;
   }
 
   /**

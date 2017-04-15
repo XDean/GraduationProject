@@ -3,7 +3,6 @@ package xdean.graduation.handler.trader;
 import xdean.graduation.handler.trader.common.AbstractTrader;
 import xdean.graduation.handler.trader.common.TraderUtil;
 import xdean.graduation.index.KDJ.KDJ;
-import xdean.graduation.index.base.DoubleIndex;
 import xdean.graduation.model.Order;
 import xdean.graduation.model.Repo;
 
@@ -16,7 +15,6 @@ import xdean.graduation.model.Repo;
 public class KdjTrader extends AbstractTrader<int[]> {
 
   KDJ kdj;
-  DoubleIndex actual;
 
   public KdjTrader(Repo repo) {
     super(repo);
@@ -25,15 +23,16 @@ public class KdjTrader extends AbstractTrader<int[]> {
   @Override
   public KdjTrader setParam(int[] p) {
     this.kdj = new KDJ(p[0], p[1], p[1], KDJ.DEFAULT_S);
-    this.actual = TraderUtil.histogramToPosition(
-        DoubleIndex.create(d -> kdj.accept(d), () -> kdj.getK() - kdj.getD()),
-        () -> policy);
     return this;
   }
 
   @Override
   public void trade(Order order) {
-    TraderUtil.tradeByPosition(repo, order, actual.get(order.getAveragePrice()));
+    super.trade(order);
+    oldK = kdj.getK();
+    oldD = kdj.getD();
+    kdj.accept(order.getAveragePrice());
+    TraderUtil.tradeByPosition(repo, order, position());
   }
 
   public double getRsv() {
@@ -50,5 +49,35 @@ public class KdjTrader extends AbstractTrader<int[]> {
 
   public double getJ() {
     return kdj.getJ();
+  }
+
+  /**
+   * old way
+   */
+  double oldK, oldD;
+
+  double position() {
+    double k = getK();
+    double d = getD();
+    double position = Double.NaN;
+    if (k < 30) {
+      position = -1;
+    }
+    if (oldK < 30 && k > 30) {
+      position = 1;
+    }
+    if (k > 70) {
+      position = 1;
+    }
+    if (oldK > 70 && k < 70) {
+      position = -1;
+    }
+    if (k < 70 && (oldK > oldD && k < d)) {
+      position = -1;
+    }
+    if (k > 30 && (oldK < oldD && k > d)) {
+      position = 1;
+    }
+    return position;
   }
 }

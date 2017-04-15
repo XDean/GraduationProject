@@ -4,8 +4,8 @@ import xdean.graduation.handler.param.handler.ParamHandler;
 import xdean.graduation.handler.param.handler.adapter.IntArrayParamAdapter;
 import xdean.graduation.handler.param.handler.adapter.IntParamAdapter;
 import xdean.graduation.handler.param.selector.ConvolutionSelector;
-import xdean.graduation.handler.param.selector.ParamSelector;
 import xdean.graduation.handler.param.selector.ConvolutionSelector.WeightPolicy;
+import xdean.graduation.handler.param.selector.ParamSelector;
 import xdean.graduation.handler.trader.MacdTrader;
 import xdean.graduation.handler.trader.common.Trader;
 import xdean.graduation.io.writer.DataWriter;
@@ -38,10 +38,10 @@ public class MacdHook extends BaseHook<int[], MacdTrader> {
         new IntParamAdapter(200, 200, 50, 5),
         new IntParamAdapter(10, 500, 50, 5));
   }
-  
+
   @Override
   public ParamSelector<int[], Double> getParamSelector() {
-    return new ConvolutionSelector(WeightPolicy.CENTER, 1, sqrDis -> sqrDis == 0 ? 0 : 1d / 8);
+    return new ConvolutionSelector(WeightPolicy.AVG, 1, sqrDis -> sqrDis == 0 ? 0 : 1d / 8);
   }
 
   @Override
@@ -57,18 +57,19 @@ public class MacdHook extends BaseHook<int[], MacdTrader> {
   public String formatParam(int[] param) {
     return String.format("f = %d, s = %d, a = %d.", param[0], param[1], param[2]);
   }
+
   @Override
   public String formatParamResult(Pair<int[], ?> pair) {
-    return String.format("With param f = %d, s = %d, a = %d, the %s = %.2f.",
+    return String.format("With param f = %d, s = %d, a = %d, the %s = %.2f%%.",
         pair.getLeft()[0], pair.getLeft()[1], pair.getLeft()[2],
-        getParamSelectIndexName(), pair.getRight());
+        getParamSelectIndexName(), 100 * (Double) pair.getRight());
   }
 
   @Override
   public String formatBestParam(Pair<int[], ?> pair) {
-    return String.format("Best param is f = %d, s = %d, a = %d, the %s = %.2f.",
+    return String.format("Best param is f = %d, s = %d, a = %d, the %s = %.2f%%.",
         pair.getLeft()[0], pair.getLeft()[1], pair.getLeft()[2],
-        getParamSelectIndexName(), pair.getRight());
+        getParamSelectIndexName(), 100 * (Double) pair.getRight());
   }
 
 }

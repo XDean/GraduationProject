@@ -52,9 +52,9 @@ public class KdjHook extends BaseHook<int[], KdjTrader> {
 
   @Override
   public String formatParamResult(Pair<int[], ?> pair) {
-    return String.format("With param n = %d, l = m =%d, the %s = %.4f.",
+    return String.format("With param n = %d, l = m =%d, the %s = %.4f.%s",
         pair.getLeft()[0], pair.getLeft()[1],
-        getParamSelectIndexName(), pair.getRight());
+        getParamSelectIndexName(), pair.getRight(), Thread.currentThread());
   }
 
   @Override
