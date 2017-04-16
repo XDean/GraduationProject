@@ -1,7 +1,5 @@
 package xdean.graduation.handler.trader.common;
 
-import java.util.function.Consumer;
-
 import lombok.experimental.UtilityClass;
 import xdean.graduation.model.Order;
 import xdean.graduation.model.Repo;
@@ -28,19 +26,26 @@ public class TraderUtil {
     currentPrice(repo, order);
   }
 
-  public Consumer<Order> closeIfOverNight(Repo repo) {
+  public PositionHandler closeIfOverNight(Repo repo) {
     Wrapper<Order> old = Wrapper.empty();
-    return order -> {
+    return (position, order) -> {
       Order oldOrder = old.get();
       old.set(order);
       if (oldOrder == null) {
-        return;
+        return position;
       }
       if (oldOrder.isNight() != order.isNight()) {
-        repo.close();
+        tradeByPosition(repo, oldOrder, 0d);
+        return 0d;
       }
+      return position;
     };
   }
+  
+  public PositionHandler cutLoss(){
+    return null;
+  }
+  
 
   public void buyPrice(Repo repo, Order order) {
     if (Context.TRADE_WITH_CURRENT_PRICE) {

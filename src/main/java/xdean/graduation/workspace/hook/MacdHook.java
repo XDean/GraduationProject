@@ -7,7 +7,7 @@ import xdean.graduation.handler.param.selector.ConvolutionSelector;
 import xdean.graduation.handler.param.selector.ConvolutionSelector.WeightPolicy;
 import xdean.graduation.handler.param.selector.ParamSelector;
 import xdean.graduation.handler.trader.MacdTrader;
-import xdean.graduation.handler.trader.common.Trader;
+import xdean.graduation.handler.trader.common.TraderUtil;
 import xdean.graduation.io.writer.DataWriter;
 import xdean.graduation.model.Repo;
 import xdean.graduation.model.Result;
@@ -18,12 +18,14 @@ public class MacdHook extends BaseHook<int[], MacdTrader> {
 
   @Override
   public MacdTrader create(Repo repo) {
-    return new MacdTrader(repo) {
+    MacdTrader macdTrader = new MacdTrader(repo) {
       @Override
-      public Trader<int[]> setParam(int[] p) {
+      public MacdTrader setParam(int[] p) {
         return super.setParam(new int[] { p[0], p[0] * p[1] / 100, p[2] });
       }
     };
+    macdTrader.addAdditionalPositionHandler(TraderUtil.closeIfOverNight(repo));
+    return macdTrader;
   }
 
   @Override

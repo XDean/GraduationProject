@@ -1,8 +1,7 @@
 package xdean.graduation.handler.trader;
 
-import xdean.graduation.handler.trader.common.AbstractTrader;
 import xdean.graduation.handler.trader.common.PositionPolicy;
-import xdean.graduation.handler.trader.common.Trader;
+import xdean.graduation.handler.trader.common.PositionTrader;
 import xdean.graduation.handler.trader.common.TraderUtil;
 import xdean.graduation.index.MACD;
 import xdean.graduation.model.Order;
@@ -16,10 +15,9 @@ import xdean.jex.util.calc.MathUtil;
  * @author XDean
  *
  */
-public class MacdTrader extends AbstractTrader<int[]> {
+public class MacdTrader extends PositionTrader<int[]> {
 
   MACD macd;
-  double position = 0;
   Double oldHistogram;
 
   public MacdTrader(Repo repo) {
@@ -27,19 +25,19 @@ public class MacdTrader extends AbstractTrader<int[]> {
   }
 
   @Override
-  public Trader<int[]> setParam(int[] p) {
+  public MacdTrader setParam(int[] p) {
     macd = new MACD(p[0], p[1], p[2]);
     return this;
   }
 
   @Override
-  public void trade(Order order) {
-    super.trade(order);
+  public double getPosition(double oldPosition, Order order) {
     oldHistogram = macd.get();
     macd.accept(order.getAveragePrice());
-    position += adjustByHistogram(oldHistogram, macd.get(), policy);
+    double position = oldPosition + adjustByHistogram(oldHistogram, macd.get(), policy);
     position = MathUtil.toRange(position, -1d, 1d);
     TraderUtil.tradeByPosition(repo, order, position);
+    return position;
   }
 
   static double adjustByHistogram(double oldHistogram, double histogram, PositionPolicy policy) {

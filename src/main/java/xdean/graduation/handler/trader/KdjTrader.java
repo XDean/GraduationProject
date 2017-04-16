@@ -1,6 +1,6 @@
 package xdean.graduation.handler.trader;
 
-import xdean.graduation.handler.trader.common.AbstractTrader;
+import xdean.graduation.handler.trader.common.PositionTrader;
 import xdean.graduation.handler.trader.common.TraderUtil;
 import xdean.graduation.index.KDJ.KDJ;
 import xdean.graduation.model.Order;
@@ -12,7 +12,7 @@ import xdean.graduation.model.Repo;
  * @author XDean
  *
  */
-public class KdjTrader extends AbstractTrader<int[]> {
+public class KdjTrader extends PositionTrader<int[]> {
 
   KDJ kdj;
 
@@ -27,28 +27,13 @@ public class KdjTrader extends AbstractTrader<int[]> {
   }
 
   @Override
-  public void trade(Order order) {
-    super.trade(order);
-    oldK = kdj.getK();
-    oldD = kdj.getD();
+  public double getPosition(double oldPosition, Order order) {
+    oldK = getK();
+    oldD = getD();
     kdj.accept(order.getAveragePrice());
-    TraderUtil.tradeByPosition(repo, order, position());
-  }
-
-  public double getRsv() {
-    return kdj.getRsv().get();
-  }
-
-  public double getK() {
-    return kdj.getK();
-  }
-
-  public double getD() {
-    return kdj.getD();
-  }
-
-  public double getJ() {
-    return kdj.getJ();
+    double position = adjustPositionByKD();
+    TraderUtil.tradeByPosition(repo, order, position);
+    return position;
   }
 
   /**
@@ -56,7 +41,7 @@ public class KdjTrader extends AbstractTrader<int[]> {
    */
   double oldK, oldD;
 
-  double position() {
+  double adjustPositionByKD() {
     double k = getK();
     double d = getD();
     double position = Double.NaN;
@@ -79,5 +64,21 @@ public class KdjTrader extends AbstractTrader<int[]> {
       position = 1;
     }
     return position;
+  }
+
+  public double getRsv() {
+    return kdj.getRsv().get();
+  }
+
+  public double getK() {
+    return kdj.getK();
+  }
+
+  public double getD() {
+    return kdj.getD();
+  }
+
+  public double getJ() {
+    return kdj.getJ();
   }
 }

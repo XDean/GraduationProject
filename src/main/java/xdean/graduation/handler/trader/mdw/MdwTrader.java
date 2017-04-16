@@ -25,7 +25,6 @@ public class MdwTrader extends AbstractTrader<int[]> {
 
   @Override
   public void trade(Order order) {
-    super.trade(order);
     if (first) {
       first = false;
       double delta = order.getCurrentPrice() - order.getLastClosePrice();

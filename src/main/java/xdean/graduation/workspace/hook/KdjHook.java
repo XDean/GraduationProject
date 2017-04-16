@@ -7,6 +7,7 @@ import xdean.graduation.handler.param.selector.ConvolutionSelector;
 import xdean.graduation.handler.param.selector.ConvolutionSelector.WeightPolicy;
 import xdean.graduation.handler.param.selector.ParamSelector;
 import xdean.graduation.handler.trader.KdjTrader;
+import xdean.graduation.handler.trader.common.TraderUtil;
 import xdean.graduation.io.writer.DataWriter;
 import xdean.graduation.model.Repo;
 import xdean.graduation.model.Result;
@@ -17,7 +18,9 @@ public class KdjHook extends BaseHook<int[], KdjTrader> {
 
   @Override
   public KdjTrader create(Repo repo) {
-    return new KdjTrader(repo);
+    KdjTrader kdjTrader = new KdjTrader(repo);
+    kdjTrader.addAdditionalPositionHandler(TraderUtil.closeIfOverNight(repo));
+    return kdjTrader;
   }
 
   @Override
@@ -52,15 +55,15 @@ public class KdjHook extends BaseHook<int[], KdjTrader> {
 
   @Override
   public String formatParamResult(Pair<int[], ?> pair) {
-    return String.format("With param n = %d, l = m =%d, the %s = %.4f.%s",
+    return String.format("With param n = %d, l = m =%d, the %s = %.2f%%.%s",
         pair.getLeft()[0], pair.getLeft()[1],
-        getParamSelectIndexName(), pair.getRight(), Thread.currentThread());
+        getParamSelectIndexName(), (Double) pair.getRight() * 100, Thread.currentThread());
   }
 
   @Override
   public String formatBestParam(Pair<int[], ?> pair) {
-    return String.format("Best param is n = %d, l = m =%d, the %s = %.4f.",
+    return String.format("Best param is n = %d, l = m =%d, the %s = %.2f%%.",
         pair.getLeft()[0], pair.getLeft()[1],
-        getParamSelectIndexName(), pair.getRight());
+        getParamSelectIndexName(), (Double) pair.getRight() * 100);
   }
 }

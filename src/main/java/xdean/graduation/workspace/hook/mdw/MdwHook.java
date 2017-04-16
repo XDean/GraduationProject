@@ -27,7 +27,7 @@ public class MdwHook extends BaseHook<int[], MdwTrader> {
 
   @Override
   public int[] getParam() {
-    return new int[] { 0, 0 };
+    return new int[] { 5, 5 };
   }
 
   @Override
