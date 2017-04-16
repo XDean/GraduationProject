@@ -25,6 +25,8 @@ public class MacdHook extends BaseHook<int[], MacdTrader> {
       }
     };
     macdTrader.addAdditionalPositionHandler(TraderUtil.closeIfOverNight(repo));
+//    macdTrader.addAdditionalPositionHandler(TraderUtil.cutLoss(repo, 0.02));
+//    macdTrader.addAdditionalPositionHandler(TraderUtil.saveEnarning(repo, 0.01, 0.9));
     return macdTrader;
   }
 

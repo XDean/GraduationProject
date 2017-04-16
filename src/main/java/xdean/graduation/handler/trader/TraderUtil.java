@@ -1,5 +1,6 @@
 package xdean.graduation.handler.trader;
 
+import rx.annotations.Beta;
 import lombok.experimental.UtilityClass;
 import xdean.graduation.handler.trader.base.PositionHandler;
 import xdean.graduation.model.Order;
@@ -42,11 +43,48 @@ public class TraderUtil {
       return position;
     };
   }
-  
-  public PositionHandler cutLoss(){
-    return null;
+
+  /**
+   * 
+   * @param repo
+   * @param lossThreshold positive double, max loss, 0.0 ~ 1.0
+   * @return
+   */
+  public PositionHandler cutLoss(Repo repo, double lossThreshold) {
+    return (position, order) -> {
+      if (repo.getReturnRate() < -lossThreshold) {
+        return 0;
+      }
+      return position;
+    };
   }
-  
+
+  @Beta
+  public PositionHandler saveEnarning(Repo repo, double startThreshold, double saveThreshold) {
+    Wrapper<Double> base = Wrapper.of(0d);
+    Wrapper<Double> high = Wrapper.of(0d);
+    return (position, order) -> {
+      double rr = repo.getReturnRate();
+      double baseRR = base.get();
+      double relativeRR = (1 + rr) / (1 + baseRR) - 1;
+      double relativeHighRR = (1 + high.get()) / (1 + baseRR) - 1;
+      if (rr < baseRR) {
+        base.set(rr);
+        high.set(rr);
+      }
+      if (relativeRR > relativeHighRR) {
+        high.set(rr);
+      }
+      if (relativeHighRR <= startThreshold) {
+        return position;
+      }
+      if (relativeRR < relativeHighRR * saveThreshold) {
+        base.set(rr);
+        return 0;
+      }
+      return position;
+    };
+  }
 
   public void buyPrice(Repo repo, Order order) {
     if (Context.TRADE_WITH_CURRENT_PRICE) {

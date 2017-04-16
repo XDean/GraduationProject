@@ -149,6 +149,7 @@ public class Util {
     dailySaver.addColumn("price", r -> r.getOrder().getCurrentPrice());
     dailySaver.addColumn("base rr", r -> r.getOrder().getReturnRate());
     dailySaver.addColumn("rr", r -> r.getRepo().getReturnRate());
+    dailySaver.addColumn("turnover", r->r.getRepo().getTurnOverRate());
     dailySaver.addColumn("accumulRR", r -> accumulRR.get() - 1);
     dailySaver.addColumn("accumulTax", accumulTax);
     dailySaver.start();

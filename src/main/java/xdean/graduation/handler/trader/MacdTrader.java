@@ -35,7 +35,6 @@ public class MacdTrader extends PositionTrader<int[]> {
     macd.accept(order.getAveragePrice());
     double position = oldPosition + adjustByHistogram(oldHistogram, macd.get(), policy);
     position = MathUtil.toRange(position, -1d, 1d);
-    TraderUtil.tradeByPosition(repo, order, position);
     return position;
   }
 
