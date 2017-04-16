@@ -1,7 +1,7 @@
 package xdean.graduation.handler.trader.mdw;
 
-import xdean.graduation.handler.trader.common.AbstractTrader;
-import xdean.graduation.handler.trader.common.TraderUtil;
+import xdean.graduation.handler.trader.TraderUtil;
+import xdean.graduation.handler.trader.base.AbstractTrader;
 import xdean.graduation.model.Order;
 import xdean.graduation.model.Repo;
 

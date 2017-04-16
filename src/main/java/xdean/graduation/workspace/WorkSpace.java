@@ -16,7 +16,7 @@ import lombok.experimental.UtilityClass;
 import rx.Observable;
 import rx.Single;
 import xdean.graduation.handler.IndexOperator;
-import xdean.graduation.handler.trader.common.Trader;
+import xdean.graduation.handler.trader.base.Trader;
 import xdean.graduation.model.Order;
 import xdean.graduation.model.Repo;
 import xdean.graduation.model.Result;
@@ -34,7 +34,7 @@ public class WorkSpace {
   }
 
   void work() {
-    Path file = Paths.get("data", "rb1705.jbh.bsv");
+    Path file = Paths.get("data", "rb170510.jbh.bsv");
     Repo repo = Repo.builder()
         .taxRate(0.0000115)
         .funds(1000 * 1000)

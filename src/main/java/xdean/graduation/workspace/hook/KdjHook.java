@@ -7,7 +7,7 @@ import xdean.graduation.handler.param.selector.ConvolutionSelector;
 import xdean.graduation.handler.param.selector.ConvolutionSelector.WeightPolicy;
 import xdean.graduation.handler.param.selector.ParamSelector;
 import xdean.graduation.handler.trader.KdjTrader;
-import xdean.graduation.handler.trader.common.TraderUtil;
+import xdean.graduation.handler.trader.TraderUtil;
 import xdean.graduation.io.writer.DataWriter;
 import xdean.graduation.model.Repo;
 import xdean.graduation.model.Result;

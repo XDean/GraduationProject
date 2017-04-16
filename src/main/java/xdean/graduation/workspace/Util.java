@@ -18,7 +18,7 @@ import rx.Observable;
 import rx.Single;
 import xdean.graduation.handler.param.handler.ParamHandler;
 import xdean.graduation.handler.param.selector.ParamSelector;
-import xdean.graduation.handler.trader.common.Trader;
+import xdean.graduation.handler.trader.base.Trader;
 import xdean.graduation.index.MaxDrawdown;
 import xdean.graduation.index.RepoAnalyser;
 import xdean.graduation.index.base.DoubleIndex;

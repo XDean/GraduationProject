@@ -3,7 +3,7 @@ package xdean.graduation.workspace.hook.mdw;
 import xdean.graduation.handler.param.handler.ParamHandler;
 import xdean.graduation.handler.param.handler.adapter.IntArrayParamAdapter;
 import xdean.graduation.handler.param.handler.adapter.IntParamAdapter;
-import xdean.graduation.handler.trader.common.PositionPolicy;
+import xdean.graduation.handler.trader.base.PositionPolicy;
 import xdean.graduation.handler.trader.mdw.MdwTrader;
 import xdean.graduation.index.base.Index;
 import xdean.graduation.io.writer.DataWriter;

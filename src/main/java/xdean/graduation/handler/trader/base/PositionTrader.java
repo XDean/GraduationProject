@@ -1,8 +1,9 @@
-package xdean.graduation.handler.trader.common;
+package xdean.graduation.handler.trader.base;
 
 import java.util.LinkedList;
 import java.util.List;
 
+import xdean.graduation.handler.trader.TraderUtil;
 import xdean.graduation.model.Order;
 import xdean.graduation.model.Repo;
 

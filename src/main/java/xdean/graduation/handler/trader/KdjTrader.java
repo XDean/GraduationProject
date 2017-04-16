@@ -1,7 +1,6 @@
 package xdean.graduation.handler.trader;
 
-import xdean.graduation.handler.trader.common.PositionTrader;
-import xdean.graduation.handler.trader.common.TraderUtil;
+import xdean.graduation.handler.trader.base.PositionTrader;
 import xdean.graduation.index.KDJ.KDJ;
 import xdean.graduation.model.Order;
 import xdean.graduation.model.Repo;

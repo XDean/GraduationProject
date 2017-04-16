@@ -1,6 +1,7 @@
-package xdean.graduation.handler.trader.common;
+package xdean.graduation.handler.trader;
 
 import lombok.experimental.UtilityClass;
+import xdean.graduation.handler.trader.base.PositionHandler;
 import xdean.graduation.model.Order;
 import xdean.graduation.model.Repo;
 import xdean.graduation.workspace.Context;

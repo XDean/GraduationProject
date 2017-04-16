@@ -1,8 +1,8 @@
 package xdean.graduation.workspace.hook;
 
 import xdean.graduation.handler.param.selector.ParamSelector;
-import xdean.graduation.handler.trader.common.PositionPolicy;
-import xdean.graduation.handler.trader.common.Trader;
+import xdean.graduation.handler.trader.base.PositionPolicy;
+import xdean.graduation.handler.trader.base.Trader;
 import xdean.graduation.index.RepoAnalyser;
 import xdean.graduation.index.base.Index;
 import xdean.graduation.model.Repo;

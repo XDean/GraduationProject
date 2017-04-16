@@ -1,4 +1,4 @@
-package xdean.graduation.handler.trader.common;
+package xdean.graduation.handler.trader.base;
 
 import java.util.function.UnaryOperator;
 
