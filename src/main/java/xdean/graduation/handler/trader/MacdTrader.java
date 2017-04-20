@@ -1,6 +1,6 @@
 package xdean.graduation.handler.trader;
 
-import xdean.graduation.handler.trader.base.PositionPolicy;
+import xdean.graduation.handler.trader.base.PositionStrategy;
 import xdean.graduation.handler.trader.base.PositionTrader;
 import xdean.graduation.index.MACD;
 import xdean.graduation.model.Order;
@@ -33,24 +33,24 @@ public class MacdTrader extends PositionTrader<int[]> {
   public double getPosition(double oldPosition, Order order) {
     oldHistogram = macd.get();
     macd.accept(order.getAveragePrice());
-    double position = oldPosition + adjustByHistogram(oldHistogram, macd.get(), policy);
+    double position = oldPosition + adjustByHistogram(oldHistogram, macd.get(), strategy);
     position = MathUtil.toRange(position, -1d, 1d);
     return position;
   }
 
-  static double adjustByHistogram(double oldHistogram, double histogram, PositionPolicy policy) {
+  static double adjustByHistogram(double oldHistogram, double histogram, PositionStrategy strategy) {
     double delta = histogram - oldHistogram;
     if (histogram > 0) {
       if (delta >= 0) {
-        return policy.open(delta);
+        return strategy.open(delta);
       } else {
-        return -policy.close(-delta);
+        return -strategy.close(-delta);
       }
     } else if (histogram < 0) {
       if (delta <= 0) {
-        return -policy.open(-delta);
+        return -strategy.open(-delta);
       } else {
-        return policy.close(delta);
+        return strategy.close(delta);
       }
     } else {
       return 0;

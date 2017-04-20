@@ -12,7 +12,7 @@ import rx.Observable.Operator;
 import rx.Scheduler;
 import xdean.graduation.handler.TimeOperator;
 import xdean.graduation.handler.VolumeOperator;
-import xdean.graduation.handler.trader.base.PositionPolicy;
+import xdean.graduation.handler.trader.base.PositionStrategy;
 import xdean.graduation.handler.trader.base.Trader;
 import xdean.graduation.io.writer.CsvSaver;
 import xdean.graduation.io.writer.DataWriter;
@@ -52,9 +52,9 @@ public class Context {
   }
 
   Operator<Order, Order> DEFAULT_OPERATER = USE_TIME ?
-      new TimeOperator(20 * 1000, 1000 * 30) :
+      new TimeOperator(10 * 1000, 1000 * 30) :
       new VolumeOperator(10);
-  PositionPolicy DEFAULT_POLICY = PositionPolicy.ALL_OUT;
+  PositionStrategy DEFAULT_POLICY = PositionStrategy.ALL_OUT;
   int THREAD_COUNT = 8;
   ParamSelectIndex PARAM_INDEX = ParamSelectIndex.RR;
 

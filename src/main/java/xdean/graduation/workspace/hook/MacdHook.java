@@ -4,11 +4,11 @@ import xdean.graduation.handler.param.handler.ParamHandler;
 import xdean.graduation.handler.param.handler.adapter.IntArrayParamAdapter;
 import xdean.graduation.handler.param.handler.adapter.IntParamAdapter;
 import xdean.graduation.handler.param.selector.ConvolutionSelector;
-import xdean.graduation.handler.param.selector.ConvolutionSelector.WeightPolicy;
+import xdean.graduation.handler.param.selector.ConvolutionSelector.WeightStrategy;
 import xdean.graduation.handler.param.selector.ParamSelector;
 import xdean.graduation.handler.trader.MacdTrader;
 import xdean.graduation.handler.trader.TraderUtil;
-import xdean.graduation.handler.trader.base.PositionPolicy;
+import xdean.graduation.handler.trader.base.PositionStrategy;
 import xdean.graduation.io.writer.DataWriter;
 import xdean.graduation.model.Repo;
 import xdean.graduation.model.Result;
@@ -25,7 +25,7 @@ public class MacdHook extends BaseHook<int[], MacdTrader> {
         return super.setParam(new int[] { p[0], (int) (p[0] * p[1] / 100d), p[2] });
       }
     };
-    macdTrader.setPositionPolicy(getPositionPolicy());
+    macdTrader.setPositionStrategy(getPositionStrategy());
     macdTrader.addAdditionalPositionHandler(TraderUtil.closeIfOverNight(repo));
     // macdTrader.addAdditionalPositionHandler(TraderUtil.cutLoss(repo, -0.01));
     // macdTrader.addAdditionalPositionHandler(TraderUtil.saveEnarning(repo, 0.01, 0.4));
@@ -42,20 +42,20 @@ public class MacdHook extends BaseHook<int[], MacdTrader> {
   @Override
   public ParamHandler<int[]> getParamHandler() {
     return new IntArrayParamAdapter(
-        new IntParamAdapter(50, 500, 25, 5),
+        new IntParamAdapter(100, 1000, 25, 5),
         new IntParamAdapter(200, 200, 50, 5),
-        new IntParamAdapter(50, 250, 25, 5));
+        new IntParamAdapter(100, 500, 25, 5));
   }
 
   @Override
   public ParamSelector<int[], Double> getParamSelector() {
-    return new ConvolutionSelector(WeightPolicy.AVG, 1, sqrDis -> sqrDis == 0 ? 0 : 1d / 8);
+    return new ConvolutionSelector(WeightStrategy.AVG, 1, sqrDis -> sqrDis == 0 ? 0 : 1d / 8);
   }
 
-  protected PositionPolicy getPositionPolicy() {
-    return PositionPolicy.ALL_OUT;
+  protected PositionStrategy getPositionStrategy() {
+    return PositionStrategy.ALL_OUT;
     // DoubleIndex average = Indexs.average();
-    // return PositionPolicy.create(d -> {
+    // return PositionStrategy.create(d -> {
     // average.accept(d);
     // double relative = d / average.get();
     // return relative * relative * 0.01;

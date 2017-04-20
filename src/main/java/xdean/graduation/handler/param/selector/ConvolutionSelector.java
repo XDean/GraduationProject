@@ -36,7 +36,7 @@ public class ConvolutionSelector implements ParamSelector<int[], Double> {
   /**
    * How to make weight sum equals 1
    */
-  public static enum WeightPolicy {
+  public static enum WeightStrategy {
     /* only add center value */
     CENTER,
 
@@ -44,7 +44,7 @@ public class ConvolutionSelector implements ParamSelector<int[], Double> {
     AVG;
   }
 
-  WeightPolicy weightPolicy;
+  WeightStrategy weightStrategy;
   int maxDistance;
   Function<Integer, Double> sqrDistanceToWeight;
 
@@ -103,9 +103,9 @@ public class ConvolutionSelector implements ParamSelector<int[], Double> {
               })
               .reduce((v, n) -> v + n)
               .map(convolution -> {
-                if (weightPolicy == WeightPolicy.CENTER) {
+                if (weightStrategy == WeightStrategy.CENTER) {
                   return convolution += (1 - weightSum.get()) * pair.getRight().doubleValue();
-                } else if (weightPolicy == WeightPolicy.AVG) {
+                } else if (weightStrategy == WeightStrategy.AVG) {
                   return convolution / weightSum.get();
                 } else {
                   throw new UnsupportedOperationException();

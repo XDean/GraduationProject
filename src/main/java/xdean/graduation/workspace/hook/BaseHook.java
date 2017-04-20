@@ -2,7 +2,6 @@ package xdean.graduation.workspace.hook;
 
 import xdean.graduation.handler.param.selector.ParamSelector;
 import xdean.graduation.handler.trader.base.Trader;
-import xdean.graduation.index.RepoAnalyser;
 import xdean.graduation.index.base.Index;
 import xdean.graduation.model.Repo;
 import xdean.graduation.model.Result;
@@ -13,7 +12,7 @@ public abstract class BaseHook<P, T extends Trader<P>> implements Hook<P, T> {
   @Override
   public final T createTrader(Repo repo) {
     T t = create(repo);
-//    t.setPositionPolicy(getPositionPolicy());
+//    t.setPositionStrategy(getPositionStrategy());
     return t;
   }
 
@@ -27,7 +26,7 @@ public abstract class BaseHook<P, T extends Trader<P>> implements Hook<P, T> {
         + "Pay tax: %.2f%%",
         result.getRepo().getReturnRate() * 100,
         result.getOrder().getReturnRate() * 100,
-        RepoAnalyser.toString(result.getAnalysis()),
+        result.getAnalysis().toString(),
         100 * result.getRepo().getTurnOverRate(),
         100 * result.getRepo().getPayTaxRate());
   }

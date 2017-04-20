@@ -3,14 +3,14 @@ package xdean.graduation.handler.param.selector;
 import org.junit.Test;
 
 import rx.Observable;
-import xdean.graduation.handler.param.selector.ConvolutionSelector.WeightPolicy;
+import xdean.graduation.handler.param.selector.ConvolutionSelector.WeightStrategy;
 import xdean.jex.extra.Pair;
 
 //TODO
 public class TestConvolutionSelector {
   @Test
   public void test() {
-    new ConvolutionSelector(WeightPolicy.CENTER, 1, sqrDistance -> 1d)
+    new ConvolutionSelector(WeightStrategy.CENTER, 1, sqrDistance -> 1d)
         .calcConvolution(Observable.just(
             Pair.of(new int[] { 0, 0 }, 1d),
             Pair.of(new int[] { 0, 1 }, 2d),

@@ -4,8 +4,7 @@ import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.experimental.FieldDefaults;
-import xdean.graduation.index.RepoAnalysis;
-import xdean.jex.extra.Pair;
+import xdean.graduation.index.RepoAnalyser;
 
 @AllArgsConstructor
 @Getter
@@ -13,6 +12,6 @@ import xdean.jex.extra.Pair;
 public class Result<T> {
   Order order;
   Repo repo;
-  Pair<RepoAnalysis, RepoAnalysis> analysis;
+  RepoAnalyser analysis;
   T trader;
 }
