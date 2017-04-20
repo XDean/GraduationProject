@@ -52,13 +52,10 @@ public class Util {
     RepoAnalyser ra = new RepoAnalyser();
     return ob
         .doOnNext(o -> trader.trade(o))
-        .doOnCompleted(() -> {
-          repo.close();
-          ra.accept(repo);
-        })
-        .doOnNext(e -> ra.accept(repo))
-        // .doOnError(Throwable::printStackTrace)
-        .map(o -> new Result<T>(o, repo, ra.get(), trader));
+        .doOnNext(o -> ra.accept(repo, o))
+        .doOnCompleted(() -> repo.close())
+        .doOnCompleted(() -> ra.accept(repo, null))
+        .map(o -> new Result<T>(o, repo, ra, trader));
   }
 
   /**
@@ -173,7 +170,7 @@ public class Util {
         .doOnCompleted(() -> System.out.println("Summary:"))
         .doOnCompleted(() -> System.out.printf("Total %d trading days. %d gain, %d loss.\n",
             count.get(), winCount.get(), count.get() - winCount.get()))
-        .doOnCompleted(() -> System.out.printf("%33s%9s%9s\n", "", "policy", "base"))
+        .doOnCompleted(() -> System.out.printf("%33s%9s%9s\n", "", "strategy", "base"))
         .doOnCompleted(() -> printPercent("Accumulated return rate", accumulRR.get() - 1, baseAccumulRR.get() - 1))
         .doOnCompleted(() -> printPercent("Max drawdown", md.get(), baseMd.get()))
         .doOnCompleted(() -> printNumber("Return rate / Max drawdown",
@@ -183,7 +180,7 @@ public class Util {
         .doOnCompleted(() -> printNumber("Annual sharp ratio", annualSR.get(), baseAnnualSR.get()))
         .doOnCompleted(() -> System.out.printf("Average daily turnover: %.2f%%\n", 100 * avgTurnover.get()))
         .doOnCompleted(() -> System.out.printf("Accumulated pay tax: %.2f%%\n", 100 * accumulTax.get()))
-        .doOnCompleted(() -> System.out.println(ra))
+        .doOnCompleted(() -> System.out.println(ra.toDailyString()))
         .doOnCompleted(() -> splitLine());
   }
 

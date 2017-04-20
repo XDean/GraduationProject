@@ -20,13 +20,10 @@ public abstract class BaseHook<P, T extends Trader<P>> implements Hook<P, T> {
 
   @Override
   public String formatIndayResult(Result<T> result) {
-    return String.format("Return rate: %.2f%%, base: %.2f%%.\n"
-        + "%s\n"
+    return String.format("%s\n"
         + "Turnover: %.2f%%\n"
         + "Pay tax: %.2f%%",
-        result.getRepo().getReturnRate() * 100,
-        result.getOrder().getReturnRate() * 100,
-        result.getAnalysis().toString(),
+        result.getAnalysis().toIndayString(),
         100 * result.getRepo().getTurnOverRate(),
         100 * result.getRepo().getPayTaxRate());
   }

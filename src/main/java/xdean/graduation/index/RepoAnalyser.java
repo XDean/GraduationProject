@@ -2,26 +2,31 @@ package xdean.graduation.index;
 
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
-import xdean.graduation.index.base.Index;
+import xdean.graduation.model.Order;
 import xdean.graduation.model.Repo;
-import xdean.jex.extra.Pair;
 
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class RepoAnalyser implements Index<Repo, RepoAnalyser> {
+public class RepoAnalyser {
 
-  RepoAnalysis longAnaly, shortAnaly;
+  HoldAnalysis longAnaly, shortAnaly;
+  ReturnRateAnalysis repo, base;
 
   public RepoAnalyser() {
-    set(new RepoAnalysis(true), new RepoAnalysis(false));
+    setHoldAnalysis(new HoldAnalysis(true), new HoldAnalysis(false));
+    repo = new ReturnRateAnalysis();
+    base = new ReturnRateAnalysis();
   }
 
-  @Override
-  public void accept(Repo t) {
-    if (t.getHold() < 0) {
-      shortAnaly.accept(t);
+  public void accept(Repo r, Order o) {
+    repo.accept(r.getReturnRate());
+    if (o != null) {
+      base.accept(o.getReturnRate());
+    }
+    if (r.getHold() < 0) {
+      shortAnaly.accept(r);
       longAnaly.end();
-    } else if (t.getHold() > 0) {
-      longAnaly.accept(t);
+    } else if (r.getHold() > 0) {
+      longAnaly.accept(r);
       shortAnaly.end();
     } else {
       shortAnaly.end();
@@ -29,38 +34,40 @@ public class RepoAnalyser implements Index<Repo, RepoAnalyser> {
     }
   }
 
-  @Override
-  public RepoAnalyser get() {
-    return this;
-  }
-
   public void merge(RepoAnalyser other) {
-    set(RepoAnalysis.merge(this.longAnaly, other.longAnaly),
-        RepoAnalysis.merge(this.shortAnaly, other.shortAnaly));
+    setHoldAnalysis(HoldAnalysis.merge(this.longAnaly, other.longAnaly),
+        HoldAnalysis.merge(this.shortAnaly, other.shortAnaly));
   }
 
-  public void merge(Pair<RepoAnalysis, RepoAnalysis> pair) {
-    set(RepoAnalysis.merge(this.longAnaly, pair.getLeft()),
-        RepoAnalysis.merge(this.shortAnaly, pair.getRight()));
-  }
-
-  private void set(RepoAnalysis longAnaly, RepoAnalysis shortAnaly) {
+  private void setHoldAnalysis(HoldAnalysis longAnaly, HoldAnalysis shortAnaly) {
     this.longAnaly = longAnaly;
     this.shortAnaly = shortAnaly;
   }
 
-  @Override
-  public String toString() {
-    return toString(longAnaly, shortAnaly);
+  private String formatHoldAnalysis() {
+    return String.format("%s\n%s", longAnaly, shortAnaly);
   }
 
-  public static String toString(RepoAnalysis longRa, RepoAnalysis shortRa) {
-    return String.format("%s\n%s", longRa, shortRa);
+  public String toIndayString() {
+    return String.format("%16s%9s%9s\n", "", "strategy", "base") +
+        formatPercent("Return rate", repo.rr, base.rr) +
+        formatPercent("Max return", repo.max.get(), base.max.get()) +
+        formatPercent("Min return", repo.min.get(), base.min.get()) +
+        formatPercent("Max drawdown", repo.md.get(), base.md.get()) +
+        formatHoldAnalysis();
+  }
+
+  public String toDailyString() {
+    return formatHoldAnalysis();
+  }
+
+  private String formatPercent(String name, double my, double base) {
+    return String.format("%-14s: %8.2f%%%8.2f%%\n", name, my * 100, base * 100);
   }
 
   public static RepoAnalyser merge(RepoAnalyser a, RepoAnalyser b) {
     RepoAnalyser merge = new RepoAnalyser();
-    merge.set(RepoAnalysis.merge(a.longAnaly, b.longAnaly), RepoAnalysis.merge(a.shortAnaly, b.shortAnaly));
+    merge.setHoldAnalysis(HoldAnalysis.merge(a.longAnaly, b.longAnaly), HoldAnalysis.merge(a.shortAnaly, b.shortAnaly));
     return merge;
   }
 }
