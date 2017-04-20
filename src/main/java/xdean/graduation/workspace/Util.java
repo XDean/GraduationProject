@@ -49,19 +49,16 @@ public class Util {
    */
   <T extends Trader<?>> Observable<Result<T>> inday(Observable<Order> ob, T trader) {
     Repo repo = trader.getRepo();
-    MaxDrawdown md = Indexs.maxDrawdown(true);
     RepoAnalyser ra = new RepoAnalyser();
     return ob
         .doOnNext(o -> trader.trade(o))
         .doOnCompleted(() -> {
           repo.close();
           ra.accept(repo);
-          md.accept(repo.getReturnRate());
         })
         .doOnNext(e -> ra.accept(repo))
-        .doOnNext(e -> md.accept(repo.getReturnRate()))
         // .doOnError(Throwable::printStackTrace)
-        .map(o -> new Result<T>(o, repo, md.get(), ra.get(), trader));
+        .map(o -> new Result<T>(o, repo, ra.get(), trader));
   }
 
   /**
@@ -129,7 +126,8 @@ public class Util {
 
   @SneakyThrows(IOException.class)
   <T> Observable<Result<Trader<T>>> saveDailyData(Observable<Result<Trader<T>>> ob, Path file) {
-    Index<Void, Integer> count = Indexs.count();
+    Index<Boolean, Integer> count = Indexs.count();
+    Index<Boolean, Integer> winCount = Indexs.count();
     DoubleIndex accumulRR = Indexs.product();
     DoubleIndex accumulTax = Indexs.sum();
     DoubleIndex avgTurnover = Indexs.average();
@@ -149,13 +147,14 @@ public class Util {
     dailySaver.addColumn("price", r -> r.getOrder().getCurrentPrice());
     dailySaver.addColumn("base rr", r -> r.getOrder().getReturnRate());
     dailySaver.addColumn("rr", r -> r.getRepo().getReturnRate());
-    dailySaver.addColumn("turnover", r->r.getRepo().getTurnOverRate());
+    dailySaver.addColumn("turnover", r -> r.getRepo().getTurnOverRate());
     dailySaver.addColumn("accumulRR", r -> accumulRR.get() - 1);
     dailySaver.addColumn("accumulTax", accumulTax);
     dailySaver.start();
     return ob
         .doOnNext(p -> splitLine())
-        .doOnNext(r -> count.accept(null))
+        .doOnNext(r -> count.accept(true))
+        .doOnNext(r -> winCount.accept(r.getRepo().getReturnRate() > 0))
         .doOnNext(r -> ra.merge(r.getAnalysis()))
         .doOnNext(r -> md.accept(r.getRepo().getReturnRate()))
         .doOnNext(r -> accumulRR.accept(1 + r.getRepo().getReturnRate()))
@@ -172,7 +171,8 @@ public class Util {
         .doOnNext(dailySaver::row)
         .doOnCompleted(dailySaver::end)
         .doOnCompleted(() -> System.out.println("Summary:"))
-        .doOnCompleted(() -> System.out.printf("Total %d trading days.\n", count.get()))
+        .doOnCompleted(() -> System.out.printf("Total %d trading days. %d gain, %d loss.\n",
+            count.get(), winCount.get(), count.get() - winCount.get()))
         .doOnCompleted(() -> System.out.printf("%33s%9s%9s\n", "", "policy", "base"))
         .doOnCompleted(() -> printPercent("Accumulated return rate", accumulRR.get() - 1, baseAccumulRR.get() - 1))
         .doOnCompleted(() -> printPercent("Max drawdown", md.get(), baseMd.get()))
@@ -201,7 +201,7 @@ public class Util {
     return Context.DataSource.valueOf(split[split.length - 2].toUpperCase());
   }
 
-  DataReader<Path, Order> getReader() {
+  public DataReader<Path, Order> getReader() {
     return CacheUtil.<DataReader<Path, Order>> cache(
         Util.class,
         "dataReader",

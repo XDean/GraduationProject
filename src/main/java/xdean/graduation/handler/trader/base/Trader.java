@@ -10,6 +10,4 @@ public interface Trader<Param> {
   Repo getRepo();
 
   Trader<Param> setParam(Param p);
-  
-  Trader<Param> setPositionPolicy(PositionPolicy policy);
 }

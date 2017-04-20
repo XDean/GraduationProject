@@ -13,7 +13,6 @@ import xdean.jex.extra.Pair;
 public class Result<T> {
   Order order;
   Repo repo;
-  double maxDrawdown;
   Pair<RepoAnalysis, RepoAnalysis> analysis;
   T trader;
 }

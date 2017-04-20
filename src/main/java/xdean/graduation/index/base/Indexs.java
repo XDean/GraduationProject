@@ -24,8 +24,8 @@ public class Indexs {
     return new RecursiveIndex<>(t -> t, (v, d) -> d.compareTo(v) < 0 ? d : v);
   }
 
-  public Index<Void, Integer> count() {
-    return new RecursiveIndex<>(0, (v, d) -> v + 1);
+  public Index<Boolean, Integer> count() {
+    return new RecursiveIndex<>(0, (v, d) -> d ? v + 1 : v);
   }
 
   public DoubleIndex sum() {

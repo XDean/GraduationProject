@@ -12,7 +12,7 @@ public interface PositionPolicy {
 
   double close(double d);
 
-  public static PositionPolicy ALL_OUT = create(d -> 2d, d -> 2d);
+  public static PositionPolicy ALL_OUT = create(d -> 2d, d -> 0d);
 
   public static PositionPolicy create(UnaryOperator<Double> open, UnaryOperator<Double> close) {
     return new PositionPolicy() {

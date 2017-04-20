@@ -1,7 +1,7 @@
 package xdean.graduation.handler.trader;
 
-import rx.annotations.Beta;
 import lombok.experimental.UtilityClass;
+import rx.annotations.Beta;
 import xdean.graduation.handler.trader.base.PositionHandler;
 import xdean.graduation.model.Order;
 import xdean.graduation.model.Repo;
@@ -47,12 +47,12 @@ public class TraderUtil {
   /**
    * 
    * @param repo
-   * @param lossThreshold positive double, max loss, 0.0 ~ 1.0
+   * @param lossThreshold negative double, max loss, -1.0 ~ 0.0
    * @return
    */
   public PositionHandler cutLoss(Repo repo, double lossThreshold) {
     return (position, order) -> {
-      if (repo.getReturnRate() < -lossThreshold) {
+      if (repo.getReturnRate() < lossThreshold) {
         return 0;
       }
       return position;
@@ -61,28 +61,25 @@ public class TraderUtil {
 
   @Beta
   public PositionHandler saveEnarning(Repo repo, double startThreshold, double saveThreshold) {
-    Wrapper<Double> base = Wrapper.of(0d);
-    Wrapper<Double> high = Wrapper.of(0d);
-    return (position, order) -> {
-      double rr = repo.getReturnRate();
-      double baseRR = base.get();
-      double relativeRR = (1 + rr) / (1 + baseRR) - 1;
-      double relativeHighRR = (1 + high.get()) / (1 + baseRR) - 1;
-      if (rr < baseRR) {
-        base.set(rr);
-        high.set(rr);
+    return new PositionHandler() {
+
+      boolean saved;
+      double maxRR;
+
+      @Override
+      public double getPosition(double oldPosition, Order order) {
+        if (saved) {
+          return 0;
+        }
+        if (maxRR > startThreshold && repo.getReturnRate() / maxRR < saveThreshold) {
+          saved = true;
+          return 0;
+        }
+        if (repo.getReturnRate() > maxRR) {
+          maxRR = repo.getReturnRate();
+        }
+        return oldPosition;
       }
-      if (relativeRR > relativeHighRR) {
-        high.set(rr);
-      }
-      if (relativeHighRR <= startThreshold) {
-        return position;
-      }
-      if (relativeRR < relativeHighRR * saveThreshold) {
-        base.set(rr);
-        return 0;
-      }
-      return position;
     };
   }
 

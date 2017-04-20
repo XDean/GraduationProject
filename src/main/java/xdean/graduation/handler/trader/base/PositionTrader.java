@@ -11,15 +11,16 @@ public abstract class PositionTrader<P> extends AbstractTrader<P> implements Pos
 
   double position = 0;
   List<PositionHandler> handlers;
+  protected PositionPolicy policy = PositionPolicy.ALL_OUT;
 
   public PositionTrader(Repo repo) {
     super(repo);
     handlers = new LinkedList<>();
+    handlers.add(this);
   }
 
   @Override
   public final void trade(Order order) {
-    position = getPosition(position, order);
     handlers.forEach(b -> position = b.getPosition(position, order));
     TraderUtil.tradeByPosition(repo, order, position);
   }
@@ -28,4 +29,8 @@ public abstract class PositionTrader<P> extends AbstractTrader<P> implements Pos
     handlers.add(handler);
   }
 
+  public Trader<P> setPositionPolicy(PositionPolicy policy) {
+    this.policy = policy;
+    return this;
+  }
 }

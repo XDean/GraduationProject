@@ -30,7 +30,7 @@ public class KdjTrader extends PositionTrader<int[]> {
     oldK = getK();
     oldD = getD();
     kdj.accept(order.getAveragePrice());
-    double position = adjustPositionByKD();
+    double position =  adjustPositionByKD();
     return position;
   }
 

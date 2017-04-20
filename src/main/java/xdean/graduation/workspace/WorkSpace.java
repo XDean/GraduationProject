@@ -98,7 +98,7 @@ public class WorkSpace {
 
   @SneakyThrows(IOException.class)
   Observable<Result<Trader<Object>>> paramIterateJBH(Path file, Repo repo) {
-    FixedLengthList<Observable<Order>> list = new FixedLengthList<>(5);//Param
+    FixedLengthList<Observable<Order>> list = new FixedLengthList<>(5);// Param
     Path output = getOutputFile(file);
     uncatch(() -> Files.delete(output));
     Files.createFile(output);
@@ -127,6 +127,7 @@ public class WorkSpace {
         .doOnNext(p -> System.out.printf("Back test %s with param %s\n",
             p.getRight().getLeft().getLeft(),
             getHook().formatParam(p.getLeft().getRight().getLeft())))
+//        .filter(p -> p.getLeft().getRight().getRight() > 0)
         .concatMap(p -> indaySave(
             p.getRight().getLeft().getRight(),
             uncheck(() -> Files.newOutputStream(output, StandardOpenOption.APPEND)),
@@ -136,8 +137,8 @@ public class WorkSpace {
         .lift(FunctionOperator.of(o -> saveDailyData(o, file)));
   }
 
-  private Single<Double> paramToResultJBH(Repo repo, Observable<Pair<String, Observable<Order>>> o,
-      Object param) {
+  private <P> Single<Double> paramToResultJBH(Repo repo, Observable<Pair<String, Observable<Order>>> o,
+      P param) {
     return o
         .concatMap(
             pair -> inday(
@@ -146,7 +147,7 @@ public class WorkSpace {
                 .last()
         )
         .lift(IndexOperator.create(() -> getHook().getResultIndex(false)))
-//         .doOnNext(r -> System.out.println(getHook().formatParamResult(Pair.of(param, r))))
+        // .doOnNext(r -> System.out.println(getHook().formatParamResult(Pair.of(param, r))))
         .toSingle();
   }
 

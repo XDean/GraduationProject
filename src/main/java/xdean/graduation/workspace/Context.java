@@ -39,30 +39,23 @@ public class Context {
   double RISK_FREE = 0.05;
   // boolean CLOSE_OVER_NIGHT = false;
   private Hook<?, ?> hook =
-//      new KdjHook();
-   new MacdHook();
-  // new MdwHook();
+      // new KdjHook();
+       new MacdHook();
+      // new MdwHook();
+//      new BaoSiHook();
 
   static {
     Object command = System.getProperties().get("sun.java.command");
     List<String> cmd = Arrays.asList(((String) command).split(" "));
-    if (cmd.contains("-time")) {
-      USE_TIME = true;
-    } else {
-      USE_TIME = false;
-    }
-    if (cmd.contains("-param")) {
-      SELECT_PARAM = true;
-    } else {
-      SELECT_PARAM = false;
-    }
+    USE_TIME = cmd.contains("-time");
+    SELECT_PARAM = cmd.contains("-param");
   }
 
   Operator<Order, Order> DEFAULT_OPERATER = USE_TIME ?
       new TimeOperator(20 * 1000, 1000 * 30) :
       new VolumeOperator(10);
-  PositionPolicy DEFAULT_POLICY = PositionPolicy.create(d -> 0.05, d -> 0.01);
-  int THREAD_COUNT = USE_TIME ? 8 : 8;
+  PositionPolicy DEFAULT_POLICY = PositionPolicy.ALL_OUT;
+  int THREAD_COUNT = 8;
   ParamSelectIndex PARAM_INDEX = ParamSelectIndex.RR;
 
   @SuppressWarnings("unchecked")
@@ -84,7 +77,6 @@ public class Context {
     cs.addColumn("cost", r -> r.getRepo().getCost());
     cs.addColumn("funds", r -> r.getRepo().getFunds());
     cs.addColumn("rr", r -> r.getRepo().getReturnRate());
-    cs.addColumn("max drawdown", r -> r.getMaxDrawdown());
   }
 
   public Scheduler getShareScheduler() {

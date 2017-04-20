@@ -8,6 +8,7 @@ import xdean.graduation.handler.param.selector.ConvolutionSelector.WeightPolicy;
 import xdean.graduation.handler.param.selector.ParamSelector;
 import xdean.graduation.handler.trader.MacdTrader;
 import xdean.graduation.handler.trader.TraderUtil;
+import xdean.graduation.handler.trader.base.PositionPolicy;
 import xdean.graduation.io.writer.DataWriter;
 import xdean.graduation.model.Repo;
 import xdean.graduation.model.Result;
@@ -21,31 +22,48 @@ public class MacdHook extends BaseHook<int[], MacdTrader> {
     MacdTrader macdTrader = new MacdTrader(repo) {
       @Override
       public MacdTrader setParam(int[] p) {
-        return super.setParam(new int[] { p[0], p[0] * p[1] / 100, p[2] });
+        return super.setParam(new int[] { p[0], (int) (p[0] * p[1] / 100d), p[2] });
       }
     };
+    macdTrader.setPositionPolicy(getPositionPolicy());
     macdTrader.addAdditionalPositionHandler(TraderUtil.closeIfOverNight(repo));
-//    macdTrader.addAdditionalPositionHandler(TraderUtil.cutLoss(repo, 0.02));
-//    macdTrader.addAdditionalPositionHandler(TraderUtil.saveEnarning(repo, 0.01, 0.9));
+    // macdTrader.addAdditionalPositionHandler(TraderUtil.cutLoss(repo, -0.01));
+    // macdTrader.addAdditionalPositionHandler(TraderUtil.saveEnarning(repo, 0.01, 0.4));
+    // macdTrader.addAdditionalPositionHandler(TraderUtil.saveEnarning(repo, 0.02, 0.6));
+    // macdTrader.addAdditionalPositionHandler(TraderUtil.saveEnarning(repo, 0.03, 0.8));
     return macdTrader;
   }
 
   @Override
   public int[] getParam() {
-    return Context.USE_TIME ? new int[] { 498, 996, 170 } : new int[] { 260, 520, 50 };
+    return Context.USE_TIME ? new int[] { 250, 200, 180 } : new int[] { 260, 200, 50 };
   }
 
   @Override
   public ParamHandler<int[]> getParamHandler() {
     return new IntArrayParamAdapter(
-        new IntParamAdapter(10, 1000, 50, 5),
+        new IntParamAdapter(50, 500, 25, 5),
         new IntParamAdapter(200, 200, 50, 5),
-        new IntParamAdapter(10, 500, 50, 5));
+        new IntParamAdapter(50, 250, 25, 5));
   }
 
   @Override
   public ParamSelector<int[], Double> getParamSelector() {
     return new ConvolutionSelector(WeightPolicy.AVG, 1, sqrDis -> sqrDis == 0 ? 0 : 1d / 8);
+  }
+
+  protected PositionPolicy getPositionPolicy() {
+    return PositionPolicy.ALL_OUT;
+    // DoubleIndex average = Indexs.average();
+    // return PositionPolicy.create(d -> {
+    // average.accept(d);
+    // double relative = d / average.get();
+    // return relative * relative * 0.01;
+    // }, d -> {
+    // average.accept(d);
+    // double relative = d / average.get();
+    // return relative * relative * 0.01;
+    // });
   }
 
   @Override
@@ -58,21 +76,23 @@ public class MacdHook extends BaseHook<int[], MacdTrader> {
   }
 
   @Override
-  public String formatParam(int[] param) {
-    return String.format("f = %d, s = %d, a = %d.", param[0], param[1], param[2]);
+  public String formatParam(int[] p) {
+    return String.format("f = %d, s = %d, a = %d.", p[0], (int) (p[0] * p[1] / 100d), p[2]);
   }
 
   @Override
   public String formatParamResult(Pair<int[], ?> pair) {
+    int[] p = pair.getLeft();
     return String.format("With param f = %d, s = %d, a = %d, the %s = %.2f%%.",
-        pair.getLeft()[0], pair.getLeft()[1], pair.getLeft()[2],
+        p[0], (int) (p[0] * p[1] / 100d), p[2],
         getParamSelectIndexName(), 100 * (Double) pair.getRight());
   }
 
   @Override
   public String formatBestParam(Pair<int[], ?> pair) {
+    int[] p = pair.getLeft();
     return String.format("Best param is f = %d, s = %d, a = %d, the %s = %.2f%%.",
-        pair.getLeft()[0], pair.getLeft()[1], pair.getLeft()[2],
+        p[0], (int) (p[0] * p[1] / 100d), p[2],
         getParamSelectIndexName(), 100 * (Double) pair.getRight());
   }
 

@@ -17,7 +17,7 @@ import xdean.graduation.model.Order;
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 @AllArgsConstructor
 public class TimeOperator implements Operator<Order, Order> {
-  private static final double ERROR_RANGE = 0.1;
+  private static final double ERROR_RANGE = 0.01;
   int baseGap;
   int ignoreGap;
 
