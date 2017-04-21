@@ -36,7 +36,7 @@ public class MacdHook extends BaseHook<int[], MacdTrader> {
 
   @Override
   public int[] getParam() {
-    return Context.USE_TIME ? new int[] { 250, 200, 180 } : new int[] { 260, 200, 50 };
+    return Context.USE_TIME ? new int[] { 500, 200, 400 } : new int[] { 260, 200, 50 };
   }
 
   @Override

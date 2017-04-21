@@ -18,8 +18,9 @@ import xdean.graduation.io.writer.CsvSaver;
 import xdean.graduation.io.writer.DataWriter;
 import xdean.graduation.model.Order;
 import xdean.graduation.model.Result;
+import xdean.graduation.workspace.hook.BaoSiHook;
 import xdean.graduation.workspace.hook.Hook;
-import xdean.graduation.workspace.hook.MacdHook;
+import xdean.graduation.workspace.hook.KdjHook;
 import xdean.graduation.workspace.optional.ParamSelectIndex;
 import xdean.jex.extra.rx.RxUtil;
 import xdean.jex.util.cache.CacheUtil;
@@ -39,10 +40,10 @@ public class Context {
   double RISK_FREE = 0.05;
   // boolean CLOSE_OVER_NIGHT = false;
   private Hook<?, ?> hook =
-      // new KdjHook();
-       new MacdHook();
+//       new KdjHook();
+//       new MacdHook();
       // new MdwHook();
-//      new BaoSiHook();
+      new BaoSiHook();
 
   static {
     Object command = System.getProperties().get("sun.java.command");

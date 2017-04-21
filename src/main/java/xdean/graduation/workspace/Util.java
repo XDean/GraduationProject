@@ -168,7 +168,7 @@ public class Util {
         .doOnNext(dailySaver::row)
         .doOnCompleted(dailySaver::end)
         .doOnCompleted(() -> System.out.println("Summary:"))
-        .doOnCompleted(() -> System.out.printf("Total %d trading days. %d gain, %d loss.\n",
+        .doOnCompleted(() -> System.out.printf("Total %d trading days. %d win, %d loss.\n",
             count.get(), winCount.get(), count.get() - winCount.get()))
         .doOnCompleted(() -> System.out.printf("%33s%9s%9s\n", "", "strategy", "base"))
         .doOnCompleted(() -> printPercent("Accumulated return rate", accumulRR.get() - 1, baseAccumulRR.get() - 1))

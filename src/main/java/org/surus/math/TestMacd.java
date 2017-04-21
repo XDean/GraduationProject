@@ -38,7 +38,6 @@ public class TestMacd {
           System.out.println("macd: " + new AugmentedDickeyFuller(macdArray).isNeedsDiff());
           System.out.println("stable: " + new AugmentedDickeyFuller(stableArray).isNeedsDiff());
         });
-    ;
   }
 
   private double[] toArray(List<Double> list) {
