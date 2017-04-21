@@ -28,7 +28,7 @@ import xdean.jex.extra.rx.op.FunctionOperator;
 import xdean.jex.util.TimeUtil;
 
 @UtilityClass
-public class WorkSpace {
+public class HFT {
   public void main(String[] args) throws IOException, InterruptedException {
     TimeUtil.timeThenPrint(() -> work(), "done in %dms\n");
   }
@@ -71,7 +71,7 @@ public class WorkSpace {
     Files.createFile(output);
     return getReader().read(file)
         .lift(new ContinuousGroupOperator<>(Order::getDate))
-        .map(WorkSpace::skipAndOp)
+        .map(HFT::skipAndOp)
         .doOnNext(o -> System.out.printf("Calc %s data.\n", o.getLeft()))
         .concatMap(o ->
             indaySave(
@@ -87,7 +87,7 @@ public class WorkSpace {
     Observable<Pair<String, Observable<Order>>> ob = getReader()
         .read(file)
         .lift(new ContinuousGroupOperator<>(Order::getDate))
-        .map(WorkSpace::skipAndOp);
+        .map(HFT::skipAndOp);
     return paramResult(
         ob,
         getHook().getParamHandler(),
@@ -106,7 +106,7 @@ public class WorkSpace {
         .read(file)
         .lift(new ContinuousGroupOperator<String, Order>(o -> o.getDate()))
         // .takeUntil(p->p.getLeft().equals("20170106"))
-        .map(WorkSpace::skipAndOp)
+        .map(HFT::skipAndOp)
         .doOnNext(p -> list.add(p.getRight()))
         .map(pair ->
             Pair.of(pair,
