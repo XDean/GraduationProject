@@ -37,7 +37,7 @@ public class KdjHook extends BaseHook<int[], KdjTrader> {
 
   @Override
   public ParamSelector<int[], Double> getParamSelector() {
-    return new ConvolutionSelector(WeightStrategy.CENTER, 1, sqrDis -> sqrDis == 0 ? 0 : 1d / 8);
+    return new ConvolutionSelector(WeightStrategy.AVG, 1, sqrDis -> sqrDis == 0 ? 0 : 1d);
   }
 
   @Override

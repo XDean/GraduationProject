@@ -17,6 +17,9 @@ public enum ParamSelectIndex {
   RR("rr",
       acc -> Indexs.accumulateReturnRate(acc)
           .newIn(r -> r.getRepo().getReturnRate())),
+  RR_TAX("rr",
+      acc -> Indexs.accumulateReturnRate(acc)
+          .newIn(r -> r.getRepo().getReturnRate() + r.getRepo().getTaxRate())),
   RRMD("rr/md",
       acc -> Indexs.rrMaxDrawdown(acc)
           .newOut(d -> Double.isNaN(d) || Double.isInfinite(d) ? 0 : d)

@@ -18,9 +18,8 @@ import xdean.graduation.io.writer.CsvSaver;
 import xdean.graduation.io.writer.DataWriter;
 import xdean.graduation.model.Order;
 import xdean.graduation.model.Result;
-import xdean.graduation.workspace.hook.BaoSiHook;
 import xdean.graduation.workspace.hook.Hook;
-import xdean.graduation.workspace.hook.KdjHook;
+import xdean.graduation.workspace.hook.MacdHook;
 import xdean.graduation.workspace.optional.ParamSelectIndex;
 import xdean.jex.extra.rx.RxUtil;
 import xdean.jex.util.cache.CacheUtil;
@@ -36,14 +35,6 @@ public class Context {
 
   boolean USE_TIME;
   boolean SELECT_PARAM;
-  boolean TRADE_WITH_CURRENT_PRICE = false;
-  double RISK_FREE = 0.05;
-  // boolean CLOSE_OVER_NIGHT = false;
-  private Hook<?, ?> hook =
-//       new KdjHook();
-//       new MacdHook();
-      // new MdwHook();
-      new BaoSiHook();
 
   static {
     Object command = System.getProperties().get("sun.java.command");
@@ -52,12 +43,20 @@ public class Context {
     SELECT_PARAM = cmd.contains("-param");
   }
 
+  private Hook<?, ?> hook =
+      // new KdjHook();
+      new MacdHook();
+  // new MdwHook();
+  // new BaoSiHook();
+  boolean TRADE_WITH_CURRENT_PRICE = false;
+  double RISK_FREE = 0.05;
+  int BACK_DAYS = 5;
   Operator<Order, Order> DEFAULT_OPERATER = USE_TIME ?
       new TimeOperator(10 * 1000, 1000 * 30) :
       new VolumeOperator(10);
   PositionStrategy DEFAULT_POLICY = PositionStrategy.ALL_OUT;
-  int THREAD_COUNT = 8;
   ParamSelectIndex PARAM_INDEX = ParamSelectIndex.RR;
+  int THREAD_COUNT = 8;
 
   @SuppressWarnings("unchecked")
   public <P, T extends Trader<P>> Hook<P, T> getHook() {

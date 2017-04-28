@@ -36,7 +36,7 @@ public class HFT {
   void work() {
     Path file = Paths.get("data", "rb170510.jbh.bsv");
     Repo repo = Repo.builder()
-        .taxRate(0.0000115)
+        .taxRate(0.0001)
         .funds(1000 * 1000)
         .canSellShort(true)
         .perLot(1)
@@ -98,16 +98,18 @@ public class HFT {
 
   @SneakyThrows(IOException.class)
   Observable<Result<Trader<Object>>> paramIterateJBH(Path file, Repo repo) {
-    FixedLengthList<Observable<Order>> list = new FixedLengthList<>(5);// Param
+    FixedLengthList<Observable<Order>> list = new FixedLengthList<>(BACK_DAYS);
     Path output = getOutputFile(file);
     uncatch(() -> Files.delete(output));
     Files.createFile(output);
     return getReader()
         .read(file)
+        // .skipWhile(o->!o.getDate().equals("20170328"))
         .lift(new ContinuousGroupOperator<String, Order>(o -> o.getDate()))
         // .takeUntil(p->p.getLeft().equals("20170106"))
         .map(HFT::skipAndOp)
         .doOnNext(p -> list.add(p.getRight()))
+        .skip(BACK_DAYS - 1)
         .map(pair ->
             Pair.of(pair,
                 paramResult(
@@ -127,7 +129,7 @@ public class HFT {
         .doOnNext(p -> System.out.printf("Back test %s with param %s\n",
             p.getRight().getLeft().getLeft(),
             getHook().formatParam(p.getLeft().getRight().getLeft())))
-//        .filter(p -> p.getLeft().getRight().getRight() > 0)
+        // .filter(p -> p.getLeft().getRight().getRight() > 0)
         .concatMap(p -> indaySave(
             p.getRight().getLeft().getRight(),
             uncheck(() -> Files.newOutputStream(output, StandardOpenOption.APPEND)),
