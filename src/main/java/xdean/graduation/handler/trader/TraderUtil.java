@@ -51,6 +51,27 @@ public class TraderUtil {
    * @return
    */
   public PositionHandler cutLoss(Repo repo, double lossThreshold) {
+    return new PositionHandler() {
+
+      double oldHold;
+      double base;
+
+      @Override
+      public double getPosition(double position, Order order) {
+        double nowHold = Math.signum(position);
+        if (oldHold != nowHold) {
+          oldHold = nowHold;
+          base = repo.getReturnRate();
+        }
+        if (inter(repo.getReturnRate(), base) < lossThreshold) {
+          return 0;
+        }
+        return position;
+      }
+    };
+  }
+
+  public PositionHandler cutLossInday(Repo repo, double lossThreshold) {
     return (position, order) -> {
       if (repo.getReturnRate() < lossThreshold) {
         return 0;
@@ -61,6 +82,34 @@ public class TraderUtil {
 
   @Beta
   public PositionHandler saveEnarning(Repo repo, double startThreshold, double saveThreshold) {
+    return new PositionHandler() {
+
+      double oldHold;
+      double base;
+      double max;
+
+      @Override
+      public double getPosition(double position, Order order) {
+        double nowHold = Math.signum(position);
+        if (oldHold != nowHold) {
+          oldHold = nowHold;
+          base = repo.getReturnRate();
+          max = 0;
+        }
+        double relative = inter(repo.getReturnRate(), base);
+        if (max > startThreshold && relative / max < saveThreshold) {
+          return 0;
+        }
+        if (relative > max) {
+          max = relative;
+        }
+        return position;
+      }
+    };
+  }
+
+  @Beta
+  public PositionHandler saveEnarningInday(Repo repo, double startThreshold, double saveThreshold) {
     return new PositionHandler() {
 
       boolean saved;
@@ -81,6 +130,10 @@ public class TraderUtil {
         return oldPosition;
       }
     };
+  }
+
+  public double inter(double totalRR, double oneRR) {
+    return (1 + totalRR) / (1 + oneRR) - 1;
   }
 
   public void buyPrice(Repo repo, Order order) {
