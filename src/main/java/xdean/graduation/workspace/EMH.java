@@ -12,7 +12,7 @@ import xdean.jex.extra.rx.op.ContinuousGroupOperator;
 @UtilityClass
 public class EMH {
   public void main(String[] args) {
-    Path file = Paths.get("data", "IF1701.jbh.bsv");
+    Path file = Paths.get("data", "rb1705.jbh.bsv");
     Util.getReader()
         .read(file)
         .takeUntil(o -> o.getDate().compareTo("20170201") > 0)
