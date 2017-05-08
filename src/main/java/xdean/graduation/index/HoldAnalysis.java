@@ -35,8 +35,9 @@ class HoldAnalysis {
     lastPrice = t.getPrice();
   }
 
-  void end() {
+  void end(Repo t) {
     if (end == false) {
+      accept(t);
       end = true;
       if (profit > startProfit) {
         winCount++;

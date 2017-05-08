@@ -24,13 +24,13 @@ public class RepoAnalyser {
     }
     if (r.getHold() < 0) {
       shortAnaly.accept(r);
-      longAnaly.end();
+      longAnaly.end(r);
     } else if (r.getHold() > 0) {
       longAnaly.accept(r);
-      shortAnaly.end();
+      shortAnaly.end(r);
     } else {
-      shortAnaly.end();
-      longAnaly.end();
+      shortAnaly.end(r);
+      longAnaly.end(r);
     }
   }
 

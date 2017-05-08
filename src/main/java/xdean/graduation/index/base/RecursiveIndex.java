@@ -7,17 +7,17 @@ import rx.functions.Func3;
 
 public class RecursiveIndex<D, T> implements Index<D, T> {
 
-  private final Func3<T, Integer, D, T> func;
+  private final Func3<T, Long, D, T> func;
   private Function<D, T> initFunc;
   private T value;
-  private int count;
+  private long count;
 
   public RecursiveIndex(Function<D, T> initFunc, BiFunction<T, D, T> func) {
     this((T) null, func);
     this.initFunc = initFunc;
   }
 
-  public RecursiveIndex(Function<D, T> initFunc, Func3<T, Integer, D, T> func) {
+  public RecursiveIndex(Function<D, T> initFunc, Func3<T, Long, D, T> func) {
     this((T) null, func);
     this.initFunc = initFunc;
   }
@@ -26,7 +26,7 @@ public class RecursiveIndex<D, T> implements Index<D, T> {
     this(initValue, (t, i, d) -> func.apply(t, d));
   }
 
-  public RecursiveIndex(T initValue, Func3<T, Integer, D, T> func) {
+  public RecursiveIndex(T initValue, Func3<T, Long, D, T> func) {
     this.func = func;
     this.value = initValue;
   }
@@ -53,7 +53,7 @@ public class RecursiveIndex<D, T> implements Index<D, T> {
       super(initValue, func);
     }
 
-    public DoubleRecursiveIndex(Double initValue, Func3<Double, Integer, Double, Double> func) {
+    public DoubleRecursiveIndex(Double initValue, Func3<Double, Long, Double, Double> func) {
       super(initValue, func);
     }
 
@@ -61,7 +61,7 @@ public class RecursiveIndex<D, T> implements Index<D, T> {
       super(initFunc, func);
     }
 
-    public DoubleRecursiveIndex(Function<Double, Double> initFunc, Func3<Double, Integer, Double, Double> func) {
+    public DoubleRecursiveIndex(Function<Double, Double> initFunc, Func3<Double, Long, Double, Double> func) {
       super(initFunc, func);
     }
 
