@@ -11,7 +11,6 @@ import lombok.AllArgsConstructor;
 import rx.Observable;
 import rx.Single;
 import xdean.jex.extra.Pair;
-import xdean.jex.extra.rx.op.FunctionOperator;
 import xdean.jex.util.calc.MathUtil;
 import xdean.jex.util.lang.ArrayUtil;
 
@@ -78,7 +77,7 @@ public class ConvolutionSelector implements ParamSelector<int[], Double> {
           AtomicDouble weightSum = new AtomicDouble();
           return Observable.just(Observable.range(-maxDistance, maxDistance * 2 + 1))
               .repeat(dimension)
-              .lift(FunctionOperator.of(MathUtil::cartesianProduct))
+              .compose(MathUtil::cartesianProduct)
               .map(point -> {
                 Set<Pair<int[], Double>> targetSet = new HashSet<>();
                 for (int i = 0; i < dimension; i++) {

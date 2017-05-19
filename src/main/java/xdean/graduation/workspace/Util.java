@@ -33,7 +33,6 @@ import xdean.graduation.model.Repo;
 import xdean.graduation.model.Result;
 import xdean.jex.extra.Pair;
 import xdean.jex.extra.rx.ParallelReplayOnSubscribe;
-import xdean.jex.extra.rx.op.FunctionOperator;
 import xdean.jex.util.cache.CacheUtil;
 import xdean.jex.util.file.FileUtil;
 import xdean.jex.util.task.TaskUtil;
@@ -68,8 +67,8 @@ public class Util {
    */
   <P, T extends Trader<P>> Single<Result<T>> indaySave(Observable<Order> ob, OutputStream output, T trader) {
     return ob
-        .lift(FunctionOperator.of(o -> inday(o, trader)))
-        .lift(FunctionOperator.of(o -> save(o, output, Context.<P, T> getHook()::extraColumns)))
+        .compose(o -> inday(o, trader))
+        .compose(o -> save(o, output, Context.<P, T> getHook()::extraColumns))
         .last()
         .toSingle();
     // save(

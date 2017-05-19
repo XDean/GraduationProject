@@ -24,7 +24,6 @@ import xdean.jex.extra.Pair;
 import xdean.jex.extra.collection.FixedLengthList;
 import xdean.jex.extra.rx.op.BothOperator;
 import xdean.jex.extra.rx.op.ContinuousGroupOperator;
-import xdean.jex.extra.rx.op.FunctionOperator;
 import xdean.jex.util.TimeUtil;
 
 @UtilityClass
@@ -80,7 +79,7 @@ public class HFT {
                 getHook().createTraderWithParam(repo.copy()))
                 .toObservable())
         .doOnNext(p -> System.out.println(getHook().formatIndayResult(p)))
-        .lift(FunctionOperator.of(o -> saveDailyData(o, file)));
+        .compose(o -> saveDailyData(o, file));
   }
 
   Single<Pair<Object, Double>> paramSelectJBH(Path file, Repo repo) {
@@ -136,7 +135,7 @@ public class HFT {
             getHook().createTrader(repo.copy()).setParam(p.getLeft().getRight().getLeft()))
             .toObservable())
         .doOnNext(p -> System.out.println(getHook().formatIndayResult(p)))
-        .lift(FunctionOperator.of(o -> saveDailyData(o, file)));
+        .compose(o -> saveDailyData(o, file));
   }
 
   private <P> Single<Double> paramToResultJBH(Repo repo, Observable<Pair<String, Observable<Order>>> o,
