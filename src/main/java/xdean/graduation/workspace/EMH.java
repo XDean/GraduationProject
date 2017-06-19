@@ -20,7 +20,7 @@ public class EMH {
         .forEach(pair -> {
           RunsTest runsTest = new RunsTest();
           Observable.from(pair.getRight())
-              .lift(new TimeOperator(10 * 1000, 1000 * 1000))
+              .lift(new TimeOperator(60 * 1000, 1000 * 1000))
               // .doOnNext(o->System.out.println(o.getTime()))
               .doOnSubscribe(() -> System.out.println(pair.getLeft() + ":"))
               .doOnNext(r -> runsTest.accept(r.getCurrentPrice()))

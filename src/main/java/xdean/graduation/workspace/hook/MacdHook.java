@@ -44,12 +44,12 @@ public class MacdHook extends BaseHook<int[], MacdTrader> {
     return new IntArrayParamAdapter(
         new IntParamAdapter(100, 1000, 25, 5),
         new IntParamAdapter(200, 200, 1, 5),
-        new IntParamAdapter(50, 500, 25, 5));
+        new IntParamAdapter(100, 500, 25, 5));
   }
 
   @Override
   public ParamSelector<int[], Double> getParamSelector() {
-    return new ConvolutionSelector(WeightStrategy.AVG, 1, sqrDis -> sqrDis == 0 ? 0 : 1d);
+    return new ConvolutionSelector(WeightStrategy.AVG, 1, sqrDis -> 1d);
   }
 
   protected PositionStrategy getPositionStrategy() {
